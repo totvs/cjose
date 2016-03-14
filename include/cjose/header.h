@@ -2,13 +2,13 @@
  * Copyrights
  *
  * Portions created or assigned to Cisco Systems, Inc. are
- * Copyright (c) 2014 Cisco Systems, Inc.  All Rights Reserved.
+ * Copyright (c) 2014-2016 Cisco Systems, Inc.  All Rights Reserved.
  */
 
 /**
  * \file
  * \brief
- * Functions and data structures for interacting with 
+ * Functions and data structures for interacting with
  * JSON Web Signature (JWS) objects.
  *
  */
@@ -18,7 +18,7 @@
 
 #include <stdbool.h>
 #include "cjose/error.h"
- 
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -53,14 +53,14 @@ extern const char *CJOSE_HDR_ALG_DIR;
 extern const char *CJOSE_HDR_ENC_A256GCM;
 
 
-/** 
- * An instance of a header object (used when creating JWE/JWS objects). 
+/**
+ * An instance of a header object (used when creating JWE/JWS objects).
  */
-typedef struct json_object cjose_header_t;
+typedef struct json_t cjose_header_t;
 
 
-/** 
- * Instsantiates a new header object. Caller is responsible for 
+/**
+ * Instsantiates a new header object. Caller is responsible for
  * subsequently releasing the object through cjose_header_release().
  *
  * \param err [out] An optional error object which can be used to get additional
@@ -73,7 +73,7 @@ cjose_header_t *cjose_header_new(
 
 /**
  * Releases an existing header object. Callers must use this method
- * to dispose of header rather than directly free'ing a cjose_header 
+ * to dispose of header rather than directly free'ing a cjose_header
  * object.
  *
  * \param header[in] the header object to be released.
@@ -83,7 +83,7 @@ void cjose_header_release(
 
 
 /**
- * Sets a header attribute on a header object.  If that header was 
+ * Sets a header attribute on a header object.  If that header was
  * previously set, this will replace the previous value with the new one.
  *
  * \param header[in] a previously instantated header object.
@@ -91,7 +91,7 @@ void cjose_header_release(
  * \param value[in] the value to assign to the header attribute.
  * \param err [out] An optional error object which can be used to get additional
  *        information in the event of an error.
- * \returns true if header is successfully set. 
+ * \returns true if header is successfully set.
  */
 bool cjose_header_set(
         cjose_header_t *header,
@@ -100,9 +100,9 @@ bool cjose_header_set(
         cjose_err *err);
 
 /**
- * Retrieves the value of the requested header attribute from the header 
+ * Retrieves the value of the requested header attribute from the header
  * object.
- * 
+ *
  * \param header[in] a header object.
  * \param attr[in] the header attribute to be got.
  * \param err [out] An optional error object which can be used to get additional

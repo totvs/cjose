@@ -8,4 +8,8 @@ libcjose_la_SOURCES=version.c \
                     jwe.c \
                     jws.c \
                     header.c \
-                    error.c
+                    error.c \
+					include/header_int.h \
+					include/jwk_int.h \
+					include/jwe_int.h \
+					include/jws_int.h

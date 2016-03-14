@@ -23,24 +23,23 @@
  *         json objects or are both missing from each, false otherwise.
  */
 static bool _match_string_attrs(
-        json_object *left_json, json_object *right_json, const char **attrs)
+        json_t *left_json, json_t *right_json, const char **attrs)
 {
     for (int i = 0; NULL != attrs[i]; ++i)
     {
         const char *left_attr_str = NULL;
-        json_object *left_attr_json = NULL;
-        if (json_object_object_get_ex(
-                left_json, attrs[i], &left_attr_json) == TRUE)
+        json_t *left_attr_json = NULL;
+        left_attr_json = json_object_get(left_json, attrs[i]);
+        if (NULL != left_attr_json)
         {
-            left_attr_str = json_object_get_string(left_attr_json);
+            left_attr_str = json_string_value(left_attr_json);
         }
 
         const char *right_attr_str = NULL;
-        json_object *right_attr_json = NULL;
-        if (json_object_object_get_ex(
-                right_json, attrs[i], &right_attr_json) == TRUE)
+        json_t *right_attr_json = json_object_get(right_json, attrs[i]);
+        if (NULL != right_attr_json)
         {
-            right_attr_str = json_object_get_string(right_attr_json);
+            right_attr_str = json_string_value(right_attr_json);
         }
 
         // return false if strings don't match (consider NULL==NULL a match)
@@ -645,12 +644,12 @@ START_TEST(test_cjose_jwk_import_valid)
         ck_assert_msg(NULL != jwk, "expected a cjose_jwk_t, but got NULL");
 
         // get json representation of "before" 
-        json_object *left_json = json_tokener_parse(JWK[i]);
+        json_t *left_json = json_loads(JWK[i], 0, NULL);
         ck_assert(NULL != left_json);
 
         // get json representation of "after" 
         const char *jwk_str = cjose_jwk_to_json(jwk, true, &err);
-        json_object *right_json = json_tokener_parse(jwk_str);
+        json_t *right_json = json_loads(jwk_str, 0, NULL);
         ck_assert(NULL != right_json);        
 
         // check that cooresponding attributes match up
@@ -661,8 +660,8 @@ START_TEST(test_cjose_jwk_import_valid)
             ck_assert_str_eq(JWK[i], jwk_str);
         }
 
-        json_object_put(left_json);
-        json_object_put(right_json);
+        json_decref(left_json);
+        json_decref(right_json);
         cjose_jwk_release(jwk);
     }
 }
@@ -823,12 +822,12 @@ START_TEST(test_cjose_jwk_import_no_zero_termination)
     ck_assert_msg(NULL != jwk, "expected a cjose_jwk_t, but got NULL");
 
     // get json representation of "before" 
-    json_object *left_json = json_tokener_parse(JWK);
+    json_t *left_json = json_loads(JWK, JSON_DISABLE_EOF_CHECK, NULL);
     ck_assert(NULL != left_json);
 
     // get json representation of "after" 
     const char *jwk_str = cjose_jwk_to_json(jwk, true, &err);
-    json_object *right_json = json_tokener_parse(jwk_str);
+    json_t *right_json = json_loads(jwk_str, 0, NULL);
     ck_assert(NULL != right_json);
 
     // check that cooresponding attributes match up
@@ -838,8 +837,8 @@ START_TEST(test_cjose_jwk_import_no_zero_termination)
         ck_assert_str_eq(JWK, jwk_str);
     }
 
-    json_object_put(left_json);
-    json_object_put(right_json);
+    json_decref(left_json);
+    json_decref(right_json);
     cjose_jwk_release(jwk);
 }
 END_TEST
@@ -866,12 +865,12 @@ START_TEST(test_cjose_jwk_import_with_base64url_padding)
     ck_assert_msg(NULL != jwk, "expected a cjose_jwk_t, but got NULL");
 
     // get json representation of "expected" (i.e. no padding) 
-    json_object *left_json = json_tokener_parse(JWK_OUT);
+    json_t *left_json = json_loads(JWK_OUT, 0, NULL);
     ck_assert(NULL != left_json);
 
     // get json representation of "actual" (i.e. reserialized original)
     const char *jwk_str = cjose_jwk_to_json(jwk, true, &err);
-    json_object *right_json = json_tokener_parse(jwk_str);
+    json_t *right_json = json_loads(jwk_str, 0, NULL);
     ck_assert(NULL != right_json);        
 
     // check that cooresponding attributes match up
@@ -881,8 +880,8 @@ START_TEST(test_cjose_jwk_import_with_base64url_padding)
         ck_assert_str_eq(JWK_OUT, jwk_str);
     }
 
-    json_object_put(left_json);
-    json_object_put(right_json);
+    json_decref(left_json);
+    json_decref(right_json);
     cjose_jwk_release(jwk);
 }
 END_TEST
@@ -910,12 +909,12 @@ START_TEST(test_cjose_jwk_EC_import_with_priv_export_with_pub)
     ck_assert_msg(NULL != jwk, "expected a cjose_jwk_t, but got NULL");
 
     // get json representation of "expected" (i.e. includes 'x' and 'y') 
-    json_object *left_json = json_tokener_parse(JWK_OUT);
+    json_t *left_json = json_loads(JWK_OUT, 0, NULL);
     ck_assert(NULL != left_json);
 
     // get json representation of "actual" (i.e. reserialized original)
     const char *jwk_str = cjose_jwk_to_json(jwk, true, &err);
-    json_object *right_json = json_tokener_parse(jwk_str);
+    json_t *right_json = json_loads(jwk_str, 0, NULL);
     ck_assert(NULL != right_json);        
 
     // check that cooresponding attributes match up
@@ -925,8 +924,8 @@ START_TEST(test_cjose_jwk_EC_import_with_priv_export_with_pub)
         ck_assert_str_eq(JWK_OUT, jwk_str);
     }
 
-    json_object_put(left_json);
-    json_object_put(right_json);
+    json_decref(left_json);
+    json_decref(right_json);
     cjose_jwk_release(jwk);
 }
 END_TEST

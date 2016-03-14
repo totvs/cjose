@@ -2,13 +2,12 @@
  * Copyrights
  *
  * Portions created or assigned to Cisco Systems, Inc. are
- * Copyright (c) 2014 Cisco Systems, Inc.  All Rights Reserved.
+ * Copyright (c) 2014-2016 Cisco Systems, Inc.  All Rights Reserved.
  */
 
 #include <cjose/jwk.h>
 
-#include <json-c/json_object.h>
-#include <json-c/json_tokener.h>
+#include <jansson.h>
 #include <openssl/ec.h>
 
 #ifndef SRC_JWK_INT_H
@@ -18,8 +17,8 @@
 typedef struct _key_fntable_int
 {
     void (*free)(cjose_jwk_t *);
-    bool (*public_json)(const cjose_jwk_t *, json_object *, cjose_err *err);
-    bool (*private_json)(const cjose_jwk_t *, json_object *, cjose_err *err);
+    bool (*public_json)(const cjose_jwk_t *, json_t *, cjose_err *err);
+    bool (*private_json)(const cjose_jwk_t *, json_t *, cjose_err *err);
 } key_fntable;
 
 // JSON Web Key structure

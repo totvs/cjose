@@ -2,7 +2,7 @@
  * Copyrights
  *
  * Portions created or assigned to Cisco Systems, Inc. are
- * Copyright (c) 2014 Cisco Systems, Inc.  All Rights Reserved.
+ * Copyright (c) 2014-2016 Cisco Systems, Inc.  All Rights Reserved.
  */
 
 #include <stdlib.h>
@@ -96,7 +96,7 @@ static bool _cjose_jwe_build_hdr(
         cjose_err *err)
 {
     // serialize the header
-    const char *hdr_str = json_object_to_json_string(header);
+    char *hdr_str = json_dumps(header, JSON_ENCODE_ANY | JSON_PRESERVE_ORDER);
     if (NULL == hdr_str)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
@@ -108,10 +108,12 @@ static bool _cjose_jwe_build_hdr(
     if (NULL == jwe->part[0].raw)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
+        free(hdr_str);
         return false;
     }
     jwe->part[0].raw_len = strlen(hdr_str);
-
+    free(hdr_str);
+    
     return true;
 }
 
@@ -123,24 +125,22 @@ static bool _cjose_jwe_validate_hdr(
         cjose_err *err)
 {
     // make sure we have an alg header
-    json_object  *alg_obj = NULL;
-    if (!json_object_object_get_ex(header, CJOSE_HDR_ALG, &alg_obj) || 
-            NULL == alg_obj)
+    json_t *alg_obj = json_object_get(header, CJOSE_HDR_ALG);
+    if (NULL == alg_obj)
     {
         CJOSE_ERROR(err, CJOSE_ERR_INVALID_ARG);
         return false;
     }
-    const char *alg = json_object_get_string(alg_obj);
+    const char *alg = json_string_value(alg_obj);
 
     // make sure we have an enc header
-    json_object  *enc_obj = NULL;
-    if (!json_object_object_get_ex(header, CJOSE_HDR_ENC, &enc_obj) || 
-            NULL == enc_obj)
+    json_t *enc_obj = json_object_get(header, CJOSE_HDR_ENC);
+    if (NULL == enc_obj)
     {
         CJOSE_ERROR(err, CJOSE_ERR_INVALID_ARG);
         return false;
     }
-    const char *enc = json_object_get_string(enc_obj);
+    const char *enc = json_string_value(enc_obj);
 
     // set JWE build functions based on header contents
     if (strcmp(alg, CJOSE_HDR_ALG_RSA_OAEP) == 0)
@@ -794,10 +794,8 @@ cjose_jwe_t *cjose_jwe_import(
     }
 
     // deserialize JSON header
-    json_tokener *tok = json_tokener_new();
-    json_object *header = json_tokener_parse_ex(
-            tok, (const char *)jwe->part[0].raw, jwe->part[0].raw_len);
-    json_tokener_free(tok);
+    json_t *header = json_loadb(
+            (const char *)jwe->part[0].raw, jwe->part[0].raw_len, 0, NULL);
     if (NULL == header)
     {
         CJOSE_ERROR(err, CJOSE_ERR_INVALID_ARG);
@@ -808,12 +806,12 @@ cjose_jwe_t *cjose_jwe_import(
     // validate the JSON header
     if (!_cjose_jwe_validate_hdr(jwe, header, err))
     {
-        json_object_put(header);
+        json_decref(header);
         CJOSE_ERROR(err, CJOSE_ERR_INVALID_ARG);
         cjose_jwe_release(jwe);
         return NULL;        
     }
-    json_object_put(header);
+    json_decref(header);
 
     return jwe;
 }

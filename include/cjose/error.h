@@ -6,7 +6,7 @@
  * Copyrights
  *
  * Portions created or assigned to Cisco Systems, Inc. are
- * Copyright (c) 2014 Cisco Systems, Inc.  All Rights Reserved.
+ * Copyright (c) 2014-2016 Cisco Systems, Inc.  All Rights Reserved.
  */
 #ifndef CJOSE_ERROR_H
 #define CJOSE_ERROR_H
@@ -26,14 +26,15 @@ extern "C"
  * specific points in the compilation.
  */
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)
-#  define GCC_BEGIN_IGNORED_WARNING(x) \
-     _Pragma("GCC diagnostic push"); \
-     PRAGMA(GCC diagnostic ignored #x)
-#  define GCC_END_IGNORED_WARNING(x) \
-     _Pragma("GCC diagnostic pop")
+#  define GCC_END_IGNORED_WARNING _Pragma("GCC diagnostic pop")
+
+#  define GCC_BEGIN_IGNORED_WARNING_ADDRESS \
+    _Pragma("GCC diagnostic push"); \
+    _Pragma("GCC diagnostic ignored \"-Waddress\"")
+#  define GCC_END_IGNORED_WARNING_ADDRESS GCC_END_IGNORED_WARNING
 #else
-#  define GCC_BEGIN_IGNORED_WARNING(x)                                                                                                        
-#  define GCC_END_IGNORED_WARNING(x)
+#  define GCC_BEGIN_IGNORED_WARNING_ADDRESS
+#  define GCC_END_IGNORED_WARNING_ADDRESS
 #endif /* defined(__GNUC__) && (__GNUC__ > 3) && (__GNUC_MINOR__ > 5) */
 
 
@@ -104,7 +105,7 @@ const char * cjose_err_message(cjose_errcode code);
  * \param errcode The error code
  */
 #define CJOSE_ERROR(err, errcode) \
-    GCC_BEGIN_IGNORED_WARNING(-Waddress);     \
+    GCC_BEGIN_IGNORED_WARNING_ADDRESS     \
         if ((err) != NULL && (errcode) != CJOSE_ERR_NONE) \
         { \
             (err)->code = (errcode); \
@@ -113,7 +114,7 @@ const char * cjose_err_message(cjose_errcode code);
             (err)->file = __FILE__; \
             (err)->line = __LINE__; \
         } \
-    GCC_END_IGNORED_WARNING(-Waddress)
+    GCC_END_IGNORED_WARNING_ADDRESS
 
 #ifdef __cplusplus
 }

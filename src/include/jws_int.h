@@ -2,13 +2,13 @@
  * Copyrights
  *
  * Portions created or assigned to Cisco Systems, Inc. are
- * Copyright (c) 2014 Cisco Systems, Inc.  All Rights Reserved.
+ * Copyright (c) 2014-2016 Cisco Systems, Inc.  All Rights Reserved.
  */
 
 #ifndef SRC_JWS_INT_H
 #define SRC_JWS_INT_H
 
-#include <json-c/json_object.h>
+#include <jansson.h>
 #include "cjose/jwe.h"
 
 // functions for building JWS parts
@@ -34,7 +34,7 @@ typedef struct _jws_fntable_int
 // JWS object
 struct _cjose_jws_int
 {
-	json_object *hdr;           // header JSON object
+	json_t *hdr;                // header JSON object
 
 	char *hdr_b64u;             // serialized and base64url encoded header
 	size_t hdr_b64u_len;

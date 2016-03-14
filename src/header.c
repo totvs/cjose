@@ -2,12 +2,12 @@
  * Copyrights
  *
  * Portions created or assigned to Cisco Systems, Inc. are
- * Copyright (c) 2014 Cisco Systems, Inc.  All Rights Reserved.
+ * Copyright (c) 2014-2016 Cisco Systems, Inc.  All Rights Reserved.
  */
 
 
 #include <stdlib.h>
-#include <json-c/json_object.h>
+#include <jansson.h>
 #include "cjose/header.h"
 #include "include/header_int.h"
 
@@ -29,7 +29,7 @@ const char *CJOSE_HDR_KID = "kid";
 cjose_header_t *cjose_header_new(
         cjose_err *err)
 {
-    cjose_header_t *retval = json_object_new_object();
+    cjose_header_t *retval = json_object();
     if (NULL == retval)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
@@ -44,7 +44,7 @@ void cjose_header_release(
 {
     if (NULL != header)
     {
-        json_object_put(header);
+        json_decref(header);
     }
 }
 
@@ -62,15 +62,17 @@ bool cjose_header_set(
         return false;
     }
 
-    json_object *value_obj = json_object_new_string(value);
+    json_t *value_obj = json_string(value);
     if (NULL == value_obj)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
         return false;
     }
 
-    json_object_object_add(
+    json_object_set(
             header, attr, value_obj);
+
+    json_decref(value_obj);
 
     return true;
 }
@@ -88,12 +90,11 @@ const char *cjose_header_get(
         return NULL;
     }
 
-    json_object *value_obj = NULL;
-    if (!json_object_object_get_ex(
-            header, attr, &value_obj))
+    json_t *value_obj = json_object_get(header, attr);
+    if (NULL == value_obj)
     {
-        return NULL; 
+        return NULL;
     }
 
-    return json_object_get_string(value_obj);
+    return json_string_value(value_obj);
 }

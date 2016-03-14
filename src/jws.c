@@ -2,7 +2,7 @@
  * Copyrights
  *
  * Portions created or assigned to Cisco Systems, Inc. are
- * Copyright (c) 2014 Cisco Systems, Inc.  All Rights Reserved.
+ * Copyright (c) 2014-2016 Cisco Systems, Inc.  All Rights Reserved.
  */
 
 #include <string.h>
@@ -54,10 +54,10 @@ static bool _cjose_jws_build_hdr(
 {
     // save header object as part of the JWS (and incr. refcount)
     jws->hdr = header;
-    json_object_get(jws->hdr);
+    json_incref(jws->hdr);
 
     // base64url encode the header
-    const char *hdr_str = json_object_to_json_string(jws->hdr);
+    char *hdr_str = json_dumps(jws->hdr, JSON_ENCODE_ANY | JSON_PRESERVE_ORDER);
     if (NULL == hdr_str)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
@@ -66,9 +66,11 @@ static bool _cjose_jws_build_hdr(
     if (!cjose_base64url_encode((const uint8_t *)hdr_str, strlen(hdr_str), 
         &jws->hdr_b64u, &jws->hdr_b64u_len, err))
     {
+        free(hdr_str);
         return false;        
     }
-
+    free(hdr_str);
+    
     return true;
 }
 
@@ -79,14 +81,13 @@ static bool _cjose_jws_validate_hdr(
         cjose_err *err)
 {
     // make sure we have an alg header
-    json_object  *alg_obj = NULL;
-    if (!json_object_object_get_ex(jws->hdr, CJOSE_HDR_ALG, &alg_obj) || 
-            NULL == alg_obj)
+    json_t *alg_obj = json_object_get(jws->hdr, CJOSE_HDR_ALG);
+    if (NULL == alg_obj)
     {
         CJOSE_ERROR(err, CJOSE_ERR_INVALID_ARG);
         return false;
     }
-    const char *alg = json_object_get_string(alg_obj);
+    const char *alg = json_string_value(alg_obj);
 
     if (strcmp(alg, CJOSE_HDR_ALG_PS256) == 0)
     {
@@ -444,7 +445,7 @@ void cjose_jws_release(cjose_jws_t *jws)
 
     if (NULL != jws->hdr)
     {
-        json_object_put(jws->hdr);
+        json_decref(jws->hdr);
     }
 
     free(jws->hdr_b64u);
@@ -557,9 +558,7 @@ cjose_jws_t *cjose_jws_import(
     }
 
     // deserialize JSON header
-    json_tokener *tok = json_tokener_new();
-    jws->hdr = json_tokener_parse_ex(tok, (const char *)hdr_str, len);
-    json_tokener_free(tok);
+    jws->hdr = json_loadb((const char *)hdr_str, len, 0, NULL);
     free(hdr_str);
     if (NULL == jws->hdr)
     {
@@ -781,4 +780,3 @@ bool cjose_jws_get_plaintext(
 
     return true;
 }
-

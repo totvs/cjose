@@ -2,7 +2,7 @@
  * Copyrights
  *
  * Portions created or assigned to Cisco Systems, Inc. are
- * Copyright (c) 2014 Cisco Systems, Inc.  All Rights Reserved.
+ * Copyright (c) 2014-2016 Cisco Systems, Inc.  All Rights Reserved.
  */
 
 #include "include/jwk_int.h"
@@ -146,7 +146,7 @@ bool cjose_jwk_set_kid(
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
         return false;
     }
-    strlcpy(jwk->kid, kid, len+1);
+    strncpy(jwk->kid, kid, len+1);
     return true;
 }
 
@@ -160,7 +160,7 @@ char *cjose_jwk_to_json(const cjose_jwk_t *jwk, bool priv, cjose_err *err)
         return NULL;
     }
 
-    json_object *json = json_object_new_object(),
+    json_t *json = json_object(),
                 *field = NULL;
     if (!json)
     {
@@ -170,25 +170,27 @@ char *cjose_jwk_to_json(const cjose_jwk_t *jwk, bool priv, cjose_err *err)
 
     // set kty
     const char *kty = cjose_jwk_name_for_kty(jwk->kty, err);
-    field = json_object_new_string(kty);
+    field = json_string(kty);
     if (!field)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
         goto to_json_cleanup;
     }
-    json_object_object_add(json, "kty", field);
+    json_object_set(json, "kty", field);
+    json_decref(field);
     field = NULL;
 
     // set kid
     if (NULL != jwk->kid)
     {
-        field = json_object_new_string(jwk->kid);
+        field = json_string(jwk->kid);
         if (!field)
         {
             CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
             goto to_json_cleanup;
         }
-        json_object_object_add(json, CJOSE_JWK_KID_STR, field);
+        json_object_set(json, CJOSE_JWK_KID_STR, field);
+        json_decref(field);
         field = NULL;
     }
 
@@ -206,27 +208,28 @@ char *cjose_jwk_to_json(const cjose_jwk_t *jwk, bool priv, cjose_err *err)
     }
 
     // generate the string ...
-    const char *str_jwk = json_object_to_json_string_ext(
-            json, JSON_C_TO_STRING_PLAIN);
+    char *str_jwk = json_dumps(
+            json, JSON_ENCODE_ANY | JSON_COMPACT | JSON_PRESERVE_ORDER);
     if (!str_jwk)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
         goto to_json_cleanup;
     }
     result = strdup(str_jwk);
-
+    free(str_jwk);
+    
     to_json_cleanup:
     if (json)
     {
-        json_object_put(json);
+        json_decref(json);
         json = NULL;
     }
     if (field)
     {
-        json_object_put(field);
+        json_decref(field);
         field = NULL;
     }
-
+    
     return result;
 }
 
@@ -235,9 +238,9 @@ char *cjose_jwk_to_json(const cjose_jwk_t *jwk, bool priv, cjose_err *err)
 
 static void _oct_free(cjose_jwk_t *jwk);
 static bool _oct_public_fields(
-        const cjose_jwk_t *jwk, json_object *json, cjose_err *err);
+        const cjose_jwk_t *jwk, json_t *json, cjose_err *err);
 static bool _oct_private_fields(
-        const cjose_jwk_t *jwk, json_object *json, cjose_err *err);
+        const cjose_jwk_t *jwk, json_t *json, cjose_err *err);
 
 static const key_fntable OCT_FNTABLE = {
     _oct_free,
@@ -277,15 +280,15 @@ static void _oct_free(cjose_jwk_t *jwk)
 }
 
 static bool _oct_public_fields(
-        const cjose_jwk_t *jwk, json_object *json, cjose_err *err)
+        const cjose_jwk_t *jwk, json_t *json, cjose_err *err)
 {
     return true;
 }
 
 static bool _oct_private_fields(
-        const cjose_jwk_t *jwk, json_object *json, cjose_err *err)
+        const cjose_jwk_t *jwk, json_t *json, cjose_err *err)
 {
-    json_object *field = NULL;
+    json_t *field = NULL;
     char *k = NULL;
     size_t klen = 0;
     uint8_t *keydata = (uint8_t *)jwk->keydata;
@@ -296,15 +299,16 @@ static bool _oct_private_fields(
         return false;
     }
 
-    field = json_object_new_string_len(k, klen);
+    field = json_stringn(k, klen);
     free(k);
     k = NULL;
     if (!field)
     {
         return false;
     }
-    json_object_object_add(json, "k", field);
-
+    json_object_set(json, "k", field);
+    json_decref(field);
+    
     return true;
 }
 
@@ -395,9 +399,9 @@ cjose_jwk_t * cjose_jwk_create_oct_spec(
 
 static void _EC_free(cjose_jwk_t *jwk);
 static bool _EC_public_fields(
-        const cjose_jwk_t *jwk, json_object *json, cjose_err *err);
+        const cjose_jwk_t *jwk, json_t *json, cjose_err *err);
 static bool _EC_private_fields(
-        const cjose_jwk_t *jwk, json_object *json, cjose_err *err);
+        const cjose_jwk_t *jwk, json_t *json, cjose_err *err);
 
 static const key_fntable EC_FNTABLE = {
     _EC_free,
@@ -540,7 +544,7 @@ static void _EC_free(cjose_jwk_t *jwk)
 }
 
 static bool _EC_public_fields(
-        const cjose_jwk_t *jwk, json_object *json, cjose_err *err)
+        const cjose_jwk_t *jwk, json_t *json, cjose_err *err)
 {
     ec_keydata      *keydata = (ec_keydata *)jwk->keydata;
     const EC_GROUP  *params = NULL;
@@ -551,20 +555,21 @@ static bool _EC_public_fields(
     char            *b64u = NULL;
     size_t          len = 0,
                     offset = 0;
-    json_object     *field = NULL;
+    json_t          *field = NULL;
     bool            result = false;
 
     // track expected binary data size
     uint8_t     numsize = _ec_size_for_curve(keydata->crv, err);
 
     // output the curve
-    field = json_object_new_string(_ec_name_for_curve(keydata->crv, err));
+    field = json_string(_ec_name_for_curve(keydata->crv, err));
     if (!field)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
         goto _ec_to_string_cleanup;
     }
-    json_object_object_add(json, "crv", field);
+    json_object_set(json, "crv", field);
+    json_decref(field);
     field = NULL;
 
     // obtain the public key
@@ -598,13 +603,14 @@ static bool _EC_public_fields(
     {
         goto _ec_to_string_cleanup;
     }
-    field = json_object_new_string_len(b64u, len);
+    field = json_stringn(b64u, len);
     if (!field)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
         goto _ec_to_string_cleanup;
     }
-    json_object_object_add(json, "x", field);
+    json_object_set(json, "x", field);
+    json_decref(field);
     field = NULL;
     free(b64u);
     b64u = NULL;
@@ -617,13 +623,14 @@ static bool _EC_public_fields(
     {
         goto _ec_to_string_cleanup;
     }
-    field = json_object_new_string_len(b64u, len);
+    field = json_stringn(b64u, len);
     if (!field)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
         goto _ec_to_string_cleanup;
     }
-    json_object_object_add(json, "y", field);
+    json_object_set(json, "y", field);
+    json_decref(field);
     field = NULL;
     free(b64u);
     b64u = NULL;
@@ -633,7 +640,7 @@ static bool _EC_public_fields(
     _ec_to_string_cleanup:
     if (field)
     {
-        json_object_put(field);
+        json_decref(field);
     }
     if (bnX)
     {
@@ -656,7 +663,7 @@ static bool _EC_public_fields(
 }
 
 static bool _EC_private_fields(
-        const cjose_jwk_t *jwk, json_object *json, cjose_err *err)
+        const cjose_jwk_t *jwk, json_t *json, cjose_err *err)
 {
     ec_keydata      *keydata = (ec_keydata *)jwk->keydata;
     const BIGNUM    *bnD = EC_KEY_get0_private_key(keydata->key);
@@ -664,7 +671,7 @@ static bool _EC_private_fields(
     char            *b64u = NULL;
     size_t          len = 0,
                     offset = 0;
-    json_object     *field = NULL;
+    json_t          *field = NULL;
     bool            result = false;
 
     // track expected binary data size
@@ -689,13 +696,14 @@ static bool _EC_private_fields(
     {
         goto _ec_to_string_cleanup;
     }
-    field = json_object_new_string_len(b64u, len);
+    field = json_stringn(b64u, len);
     if (!field)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
         goto _ec_to_string_cleanup;
     }
-    json_object_object_add(json, "d", field);
+    json_object_set(json, "d", field);
+    json_decref(field);
     field = NULL;
     free(b64u);
     b64u = NULL;
@@ -908,9 +916,9 @@ cjose_jwk_t *cjose_jwk_create_EC_spec(
 
 static void _RSA_free(cjose_jwk_t *jwk);
 static bool _RSA_public_fields(
-        const cjose_jwk_t *jwk, json_object *json, cjose_err *err);
+        const cjose_jwk_t *jwk, json_t *json, cjose_err *err);
 static bool _RSA_private_fields(
-        const cjose_jwk_t *jwk, json_object *json, cjose_err *err);
+        const cjose_jwk_t *jwk, json_t *json, cjose_err *err);
 
 static const key_fntable RSA_FNTABLE = {
     _RSA_free,
@@ -948,9 +956,9 @@ static void _RSA_free(cjose_jwk_t *jwk)
 }
 
 static inline bool _RSA_json_field(
-        BIGNUM *param, const char *name, json_object *json, cjose_err *err)
+        BIGNUM *param, const char *name, json_t *json, cjose_err *err)
 {
-    json_object *field = NULL;
+    json_t      *field = NULL;
     uint8_t     *data = NULL;
     char        *b64u = NULL;
     size_t      datalen = 0,
@@ -974,13 +982,14 @@ static inline bool _RSA_json_field(
     {
         goto RSA_json_field_cleanup;
     }
-    field = json_object_new_string_len(b64u, b64ulen);
+    field = json_stringn(b64u, b64ulen);
     if (!field)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
         goto RSA_json_field_cleanup;
     }
-    json_object_object_add(json, name, field);
+    json_object_set(json, name, field);
+    json_decref(field);
     field = NULL;
     result = true;
 
@@ -1000,7 +1009,7 @@ static inline bool _RSA_json_field(
 }
 
 static bool _RSA_public_fields(
-        const cjose_jwk_t *jwk, json_object *json, cjose_err *err)
+        const cjose_jwk_t *jwk, json_t *json, cjose_err *err)
 {
     RSA *rsa = (RSA *)jwk->keydata;
     if (!_RSA_json_field(rsa->e, "e", json, err))
@@ -1016,7 +1025,7 @@ static bool _RSA_public_fields(
 }
 
 static bool _RSA_private_fields(
-        const cjose_jwk_t *jwk, json_object *json, cjose_err *err)
+        const cjose_jwk_t *jwk, json_t *json, cjose_err *err)
 {
     RSA *rsa = (RSA *)jwk->keydata;
     if (!_RSA_json_field(rsa->d, "d", json, err))
@@ -1206,13 +1215,13 @@ cjose_jwk_t *cjose_jwk_create_RSA_spec(
 
 
 static const char *_get_json_object_string_attribute(
-        json_object *json, const char *key, cjose_err *err)
+        json_t *json, const char *key, cjose_err *err)
 {
-    const char *attr_str = NULL;
-    json_object *attr_json = NULL;
-    if (json_object_object_get_ex(json, key, &attr_json) == TRUE)
+    const char  *attr_str = NULL;
+    json_t *attr_json = json_object_get(json, key);
+    if (NULL != attr_json)
     {
-        attr_str = json_object_get_string(attr_json);
+        attr_str = json_string_value(attr_json);
     }
     return attr_str;
 } 
@@ -1238,7 +1247,7 @@ static const char *_get_json_object_string_attribute(
  * \returns true  if attribute is either not present or successfully decoded.
  *                false otherwise.
  */
-static bool _decode_json_object_base64url_attribute(json_object *jwk_json, 
+static bool _decode_json_object_base64url_attribute(json_t *jwk_json, 
         const char *key, uint8_t **buffer, size_t *buflen, cjose_err *err)
 {
     // get the base64url encoded string value of the attribute (if any)
@@ -1278,7 +1287,7 @@ static bool _decode_json_object_base64url_attribute(json_object *jwk_json,
     return true;
 }
 
-static cjose_jwk_t *_cjose_jwk_import_EC(json_object *jwk_json, cjose_err *err)
+static cjose_jwk_t *_cjose_jwk_import_EC(json_t *jwk_json, cjose_err *err)
 {
     cjose_jwk_t *jwk = NULL;
     uint8_t *x_buffer = NULL;
@@ -1360,7 +1369,7 @@ static cjose_jwk_t *_cjose_jwk_import_EC(json_object *jwk_json, cjose_err *err)
     return jwk;
 }
 
-static cjose_jwk_t *_cjose_jwk_import_RSA(json_object *jwk_json, cjose_err *err)
+static cjose_jwk_t *_cjose_jwk_import_RSA(json_t *jwk_json, cjose_err *err)
 {
     cjose_jwk_t *jwk = NULL;
     uint8_t *n_buffer = NULL;
@@ -1480,7 +1489,7 @@ static cjose_jwk_t *_cjose_jwk_import_RSA(json_object *jwk_json, cjose_err *err)
     return jwk;
 }
 
-static cjose_jwk_t *_cjose_jwk_import_oct(json_object *jwk_json, cjose_err *err)
+static cjose_jwk_t *_cjose_jwk_import_oct(json_t *jwk_json, cjose_err *err)
 {
     cjose_jwk_t *jwk = NULL;
     uint8_t *k_buffer = NULL;
@@ -1517,9 +1526,7 @@ cjose_jwk_t *cjose_jwk_import(const char *jwk_str, size_t len, cjose_err *err)
     }
 
     // parse json content from the given string
-    json_tokener *tok = json_tokener_new();
-    json_object *jwk_json = json_tokener_parse_ex(tok, jwk_str, len);
-    json_tokener_free(tok);
+    json_t *jwk_json = json_loadb(jwk_str, len, 0, NULL);
     if (NULL == jwk_json)
     {
         CJOSE_ERROR(err, CJOSE_ERR_INVALID_ARG);
@@ -1580,7 +1587,7 @@ cjose_jwk_t *cjose_jwk_import(const char *jwk_str, size_t len, cjose_err *err)
     import_cleanup:
     if (NULL != jwk_json)
     {
-        json_object_put(jwk_json);
+        json_decref(jwk_json);
     }
 
     return jwk;
@@ -1791,7 +1798,3 @@ bool cjose_jwk_hkdf(
 
     return true;
 }
-
-
-
-

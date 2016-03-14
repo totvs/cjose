@@ -4,8 +4,11 @@ Implementation of JOSE for C/C++
 
 ## Prerequisites ##
 
+*MAC OS X* All of the prerequisites can be installed via [brew](http://brew.sh/).
+
 ### Build Tools ###
 
+* pkg-config (>= 0.20)
 * GNU Make >= 3.81
 * LLVM >= 5.1 or GCC >= 4.5
 * Autoconf (>= 2.69)
@@ -17,7 +20,7 @@ Implementation of JOSE for C/C++
 ### Libraries ###
 
 * OpenSSL >= 1.0.1h (or its API equivalent)
-* JSON-C >= 0.12
+* Jansson >= 2.7
 
 ## Getting Started ##
 
@@ -30,7 +33,7 @@ As with most autoconf/automake projects:
 ### Common Options ###
 
     --with-openssl: Specify the location where OpenSSL/CiscoSSL is installed
-    --with-json-c: Specify the location where JSON-C is installed
+    --with-jansson: Specify the location where Jansson is installed
     --disable-shared: Only build static library
 
 ### Debug Mode ###
@@ -72,21 +75,14 @@ in the cflags:
 
     ./configure CFLAGS="-I/usr/local/include"
 
-### Configure can't find the json-c library.
+### Make fails due to many OpenSSL functions being "deprecated" or missing.
 
-This has been seen on Mac OSX 10.9 when jose-c has been installed via brew.
-A solution is to explicitly include the json-c directory in the configure 
-command:
+This has been seen on Mac OSX 10.9 when openssl 1.0.1h or newer has been installed via brew.  A solution is to explicitly include the openssl directory in the configure command:
 
-    ./configure --with-json-c=/usr/local/Cellar/json-c/0.12
+    ./configure --with-openssl=/usr/local/opt/openssl
 
-### Make fails due to many OpenSSL functions being "deprecated".
+### Make fails due to json_* functions missing.
 
-This has been seen on Mac OSX 10.9 when openssl 1.0.1h has been installed via
-brew.  A solution is to explicitly include the openssl directory in the 
-configure command:
+This has been seen on Mac OSX 10.9 when Jansson has been installed via brew.  A solution is to explicitly include the jansson directory in the configure command:
 
-    ./configure --with-openssl=/usr/local/Cellar/openssl/1.0.1h
-
-(This can of course be combined with the "--with-json-c" parameter described above
-when experiencing both issues).
+    ./configure --with-jansson=/usr/local/opt/jansson

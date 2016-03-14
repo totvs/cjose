@@ -29,10 +29,11 @@ doc/Doxyfile
 *.out
 *.app
 
-# Documentation
+# Documentation and Packaging
 doc/*.tag
 doc/html
 doc/latex
+cjose.pc
 
 # Tests and logging
 test/check_cjose
@@ -41,6 +42,7 @@ test/*.trs
 
 # local edit and ide files
 .swp
+.*.swp
 .tags
 *.sublime-project
 *.sublime-workspace

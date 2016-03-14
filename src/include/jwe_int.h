@@ -2,13 +2,13 @@
  * Copyrights
  *
  * Portions created or assigned to Cisco Systems, Inc. are
- * Copyright (c) 2014 Cisco Systems, Inc.  All Rights Reserved.
+ * Copyright (c) 2014-2016 Cisco Systems, Inc.  All Rights Reserved.
  */
 
 #ifndef SRC_JWE_INT_H
 #define SRC_JWE_INT_H
 
-#include <json-c/json_object.h>
+#include <jansson.h>
 #include "cjose/jwe.h"
 
 
