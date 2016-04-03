@@ -5,15 +5,18 @@
  * Copyright (c) 2014-2016 Cisco Systems, Inc.  All Rights Reserved.
  */
 
+#include <cjose/base64.h>
+#include <cjose/header.h>
+#include <cjose/jwe.h>
+#include <cjose/util.h>
+
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include <openssl/rand.h>
 #include <openssl/rsa.h>
 #include <openssl/evp.h>
-#include "cjose/jwe.h"
-#include "cjose/header.h"
-#include "cjose/base64.h"
+
 #include "include/header_int.h"
 #include "include/jwk_int.h"
 #include "include/jwe_int.h"
@@ -66,7 +69,7 @@ static bool _cjose_jwe_malloc(
         uint8_t **buffer,
         cjose_err *err)
 {
-    *buffer = (uint8_t *)malloc(bytes);
+    *buffer = (uint8_t *)cjose_get_alloc()(bytes);
     if (NULL == *buffer)
     {   
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
@@ -108,11 +111,11 @@ static bool _cjose_jwe_build_hdr(
     if (NULL == jwe->part[0].raw)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
-        free(hdr_str);
+        cjose_get_dealloc()(hdr_str);
         return false;
     }
     jwe->part[0].raw_len = strlen(hdr_str);
-    free(hdr_str);
+    cjose_get_dealloc()(hdr_str);
     
     return true;
 }
@@ -189,7 +192,7 @@ static bool _cjose_jwe_set_cek_a256gcm(
     // if no JWK is provided, generate a random key
     if (NULL == jwk)
     {
-        free(jwe->cek);
+        cjose_get_dealloc()(jwe->cek);
         if (!_cjose_jwe_malloc(keysize, true, &jwe->cek, err))
         {
             return false;
@@ -208,7 +211,7 @@ static bool _cjose_jwe_set_cek_a256gcm(
         }
 
         // copy the key material directly from jwk to the jwe->cek
-        free(jwe->cek);
+        cjose_get_dealloc()(jwe->cek);
         if (!_cjose_jwe_malloc(keysize, false, &jwe->cek, err))
         {
             return false;
@@ -286,7 +289,7 @@ static bool _cjose_jwe_encrypt_ek_rsa_oaep(
     }
 
     // allocate memory for RSA encryption
-    free(jwe->part[1].raw);
+    cjose_get_dealloc()(jwe->part[1].raw);
     if (!_cjose_jwe_malloc(jwe->part[1].raw_len, false, &jwe->part[1].raw, err))
     {
         return false;        
@@ -325,7 +328,7 @@ static bool _cjose_jwe_decrypt_ek_rsa_oaep(
     }
 
     // we don't know the size of the key to expect, but must be < RSA_size
-    free(jwe->cek);
+    cjose_get_dealloc()(jwe->cek);
     size_t buflen = RSA_size((RSA *)jwk->keydata);
     if (!_cjose_jwe_malloc(buflen, false, &jwe->cek, err))
     {
@@ -352,7 +355,7 @@ static bool _cjose_jwe_set_iv_a256gcm(
         cjose_err *err)
 {
     // generate IV as random 96 bit value
-    free(jwe->part[2].raw);
+    cjose_get_dealloc()(jwe->part[2].raw);
     jwe->part[2].raw_len = 12;
     if (!_cjose_jwe_malloc(jwe->part[2].raw_len, true, &jwe->part[2].raw, err))
     {
@@ -423,7 +426,7 @@ static bool _cjose_jwe_encrypt_dat_a256gcm(
     }
 
     // allocate buffer for the ciphertext
-    free(jwe->part[3].raw);
+    cjose_get_dealloc()(jwe->part[3].raw);
     jwe->part[3].raw_len = plaintext_len;
     if (!_cjose_jwe_malloc(jwe->part[3].raw_len, false, &jwe->part[3].raw, err))
     {
@@ -448,7 +451,7 @@ static bool _cjose_jwe_encrypt_dat_a256gcm(
     }
 
     // allocate buffer for the authentication tag
-    free(jwe->part[4].raw);
+    cjose_get_dealloc()(jwe->part[4].raw);
     jwe->part[4].raw_len = 16;
     if (!_cjose_jwe_malloc(jwe->part[4].raw_len, false, &jwe->part[4].raw, err))
     {
@@ -527,7 +530,7 @@ static bool _cjose_jwe_decrypt_dat_a256gcm(
     }
 
     // allocate buffer for the plaintext
-    free(jwe->dat);
+    cjose_get_dealloc()(jwe->dat);
     jwe->dat_len = jwe->part[3].raw_len;
     if (!_cjose_jwe_malloc(jwe->dat_len, false, &jwe->dat, err))
     {
@@ -644,12 +647,12 @@ void cjose_jwe_release(
     }
     for (int i = 0; i < 5; ++i)
     {
-        free(jwe->part[i].raw);
-        free(jwe->part[i].b64u);
+        cjose_get_dealloc()(jwe->part[i].raw);
+        cjose_get_dealloc()(jwe->part[i].b64u);
     }
-    free(jwe->cek);
-    free(jwe->dat);
-    free(jwe);
+    cjose_get_dealloc()(jwe->cek);
+    cjose_get_dealloc()(jwe->dat);
+    cjose_get_dealloc()(jwe);
 }
 
 

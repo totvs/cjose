@@ -6,6 +6,7 @@
  */
 
 #include <cjose/base64.h>
+#include <cjose/util.h>
 
 #include <errno.h>
 #include <string.h>
@@ -73,7 +74,7 @@ static inline bool _decode(const char *input, size_t inlen,
     // return empty string on 0 length input
     if (0 == inlen)
     {
-        uint8_t *retVal = (uint8_t *)malloc(sizeof(uint8_t));
+        uint8_t *retVal = (uint8_t *)cjose_get_alloc()(sizeof(uint8_t));
         if (NULL == retVal)
         {
             CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
@@ -96,7 +97,7 @@ static inline bool _decode(const char *input, size_t inlen,
     // rlen takes a best guess on size;
     // might be too large for base64url, but never too small.
     size_t  rlen = ((inlen * 3) >> 2) + 3;
-    uint8_t *buffer = malloc(sizeof(uint8_t) * rlen);
+    uint8_t *buffer = cjose_get_alloc()(sizeof(uint8_t) * rlen);
     if (NULL == buffer)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
@@ -130,7 +131,7 @@ static inline bool _decode(const char *input, size_t inlen,
         if (0xff == val)
         {
             CJOSE_ERROR(err, CJOSE_ERR_INVALID_ARG);
-            free(buffer);
+            cjose_get_dealloc()(buffer);
             return false;
         }
         idx++;
@@ -168,7 +169,7 @@ static inline bool _decode(const char *input, size_t inlen,
     b64_decode_failed:
     if (NULL != buffer)
     {
-        free(buffer);
+        cjose_get_dealloc()(buffer);
     }
     return false;
 }
@@ -186,7 +187,7 @@ static inline bool _encode(const uint8_t *input, size_t inlen,
     // return empty string on 0 length input
     if (!inlen)
     {
-        char * retVal = (char *)malloc(sizeof(char));
+        char * retVal = (char *)cjose_get_alloc()(sizeof(char));
         if (!retVal)
         {
             CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
@@ -202,7 +203,7 @@ static inline bool _encode(const uint8_t *input, size_t inlen,
     size_t          rlen = (((inlen + 2) / 3) << 2);
     char            *base;
 
-    base = (char *)malloc(sizeof(char) * (rlen+1));
+    base = (char *)cjose_get_alloc()(sizeof(char) * (rlen+1));
     if (NULL == base)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
