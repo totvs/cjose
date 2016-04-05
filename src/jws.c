@@ -371,14 +371,14 @@ static bool _cjose_jws_build_cser(
 ////////////////////////////////////////////////////////////////////////////////
 cjose_jws_t *cjose_jws_sign(
         const cjose_jwk_t *jwk,
-        cjose_header_t *header,
+        cjose_header_t *protected_header,
         const uint8_t *plaintext,
         size_t plaintext_len,
         cjose_err *err)
 {
     cjose_jws_t *jws = NULL;
 
-    if (NULL == jwk || NULL == header || NULL == plaintext)
+    if (NULL == jwk || NULL == protected_header || NULL == plaintext)
     {
         CJOSE_ERROR(err, CJOSE_ERR_INVALID_ARG);
         return NULL;
@@ -394,7 +394,7 @@ cjose_jws_t *cjose_jws_sign(
     memset(jws, 0, sizeof(cjose_jws_t));
 
     // build JWS header
-    if (!_cjose_jws_build_hdr(jws, header, err))
+    if (!_cjose_jws_build_hdr(jws, protected_header, err))
     {
         cjose_jws_release(jws);
         return NULL;
@@ -783,4 +783,16 @@ bool cjose_jws_get_plaintext(
     *plaintext_len = jws->dat_len;
 
     return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+cjose_header_t *cjose_jws_get_protected(
+    cjose_jws_t *jws)
+{
+    if (NULL == jws)
+    {
+        return NULL;
+    }
+
+    return jws->hdr;
 }
