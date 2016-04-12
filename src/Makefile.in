@@ -130,9 +130,9 @@ am__uninstall_files_from_dir = { \
 am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libcjose_la_LIBADD =
-am_libcjose_la_OBJECTS = libcjose_la-version.lo libcjose_la-base64.lo \
-	libcjose_la-jwk.lo libcjose_la-jwe.lo libcjose_la-jws.lo \
-	libcjose_la-header.lo libcjose_la-error.lo
+am_libcjose_la_OBJECTS = libcjose_la-version.lo libcjose_la-util.lo \
+	libcjose_la-base64.lo libcjose_la-jwk.lo libcjose_la-jwe.lo \
+	libcjose_la-jws.lo libcjose_la-header.lo libcjose_la-error.lo
 libcjose_la_OBJECTS = $(am_libcjose_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -348,6 +348,7 @@ AM_CFLAGS = -std=gnu99 --pedantic -Wall -Werror -g -O2 -I$(top_builddir)/include
 lib_LTLIBRARIES = libcjose.la
 libcjose_la_CPPFLAGS = -I$(topdir)/include
 libcjose_la_SOURCES = version.c \
+					util.c \
 					base64.c \
                     jwk.c \
                     jwe.c \
@@ -443,6 +444,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcjose_la-jwe.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcjose_la-jwk.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcjose_la-jws.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcjose_la-util.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcjose_la-version.Plo@am__quote@
 
 .c.o:
@@ -472,6 +474,13 @@ libcjose_la-version.lo: version.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='version.c' object='libcjose_la-version.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcjose_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcjose_la-version.lo `test -f 'version.c' || echo '$(srcdir)/'`version.c
+
+libcjose_la-util.lo: util.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcjose_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcjose_la-util.lo -MD -MP -MF $(DEPDIR)/libcjose_la-util.Tpo -c -o libcjose_la-util.lo `test -f 'util.c' || echo '$(srcdir)/'`util.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libcjose_la-util.Tpo $(DEPDIR)/libcjose_la-util.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='util.c' object='libcjose_la-util.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcjose_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcjose_la-util.lo `test -f 'util.c' || echo '$(srcdir)/'`util.c
 
 libcjose_la-base64.lo: base64.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcjose_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcjose_la-base64.lo -MD -MP -MF $(DEPDIR)/libcjose_la-base64.Tpo -c -o libcjose_la-base64.lo `test -f 'base64.c' || echo '$(srcdir)/'`base64.c

@@ -11,6 +11,7 @@ check_cjose_CFLAGS = @CHECK_CFLAGS@ -I$(top_builddir)/include \
 check_cjose_LDADD = $(top_builddir)/src/libcjose.la @CHECK_LIBS@
 check_cjose_SOURCES = check_cjose.c \
                       check_version.c \
+                      check_util.c \
                       check_base64.c \
                       check_jwk.c \
                       check_jwe.c \

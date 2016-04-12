@@ -10,6 +10,7 @@
 #include <check.h>
 
 Suite *cjose_version_suite();
+Suite *cjose_util_suite();
 Suite *cjose_base64_suite();
 Suite *cjose_jwk_suite();
 Suite *cjose_jwe_suite();
@@ -26,4 +27,3 @@ Suite *cjose_utils_suite();
 } while (0);
 
 #define ck_assert_bin_eq(X, Y, LEN) _ck_assert_bin(X, ==, Y, LEN)
-

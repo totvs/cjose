@@ -5,18 +5,22 @@
  * Copyright (c) 2014-2016 Cisco Systems, Inc.  All Rights Reserved.
  */
 
+
+#include <cjose/base64.h>
+#include <cjose/header.h>
+#include <cjose/jws.h>
+#include <cjose/jwk.h>
+#include <cjose/util.h>
+
 #include <string.h>
 #include <assert.h>
 #include <openssl/evp.h>
 #include <openssl/rsa.h>
 #include <openssl/err.h>
-#include "cjose/base64.h"
-#include "cjose/jws.h"
-#include "include/jws_int.h"
-#include "cjose/jwk.h"
+
 #include "include/jwk_int.h"
-#include "cjose/header.h"
 #include "include/header_int.h"
+#include "include/jws_int.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -120,7 +124,7 @@ static bool _cjose_jws_build_dat(
 {
     // copy plaintext data
     jws->dat_len = plaintext_len;
-    jws->dat = (uint8_t *)malloc(jws->dat_len);
+    jws->dat = (uint8_t *)cjose_get_alloc()(jws->dat_len);
     if (NULL == jws->dat)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
@@ -158,7 +162,7 @@ static bool _cjose_jws_build_dig_sha256(
 
     // allocate buffer for digest
     jws->dig_len = digest_alg->md_size;
-    jws->dig = (uint8_t *)malloc(jws->dig_len);
+    jws->dig = (uint8_t *)cjose_get_alloc()(jws->dig_len);
     if (NULL == jws->dig)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
@@ -242,7 +246,7 @@ static bool _cjose_jws_build_sig_ps256(
     // apply EMSA-PSS encoding (RFC-3447, 8.1.1, step 1)
     // (RSA_padding_add_PKCS1_PSS includes PKCS1_MGF1, -1 => saltlen = hashlen)
     em_len = RSA_size((RSA *)jwk->keydata);
-    em = (uint8_t *)malloc(em_len);
+    em = (uint8_t *)cjose_get_alloc()(em_len);
     if (NULL == em)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
@@ -257,7 +261,7 @@ static bool _cjose_jws_build_sig_ps256(
 
     // sign the digest (RFC-3447, 8.1.1, step 2)
     jws->sig_len = em_len;
-    jws->sig = (uint8_t *)malloc(jws->sig_len);
+    jws->sig = (uint8_t *)cjose_get_alloc()(jws->sig_len);
     if (NULL == jws->sig)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
@@ -303,7 +307,7 @@ static bool _cjose_jws_build_sig_rs256(
 
     // allocate buffer for signature
     jws->sig_len = RSA_size((RSA *)jwk->keydata);
-    jws->sig = (uint8_t *)malloc(jws->sig_len);
+    jws->sig = (uint8_t *)cjose_get_alloc()(jws->sig_len);
     if (NULL == jws->sig)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
@@ -349,7 +353,7 @@ static bool _cjose_jws_build_cser(
 
     // allocate buffer for compact serialization
     assert(NULL == jws->cser);
-    jws->cser = (char *)malloc(jws->cser_len);
+    jws->cser = (char *)cjose_get_alloc()(jws->cser_len);
     if (NULL == jws->cser)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
@@ -381,7 +385,7 @@ cjose_jws_t *cjose_jws_sign(
     }
 
     // allocate and initialize JWS
-    jws = (cjose_jws_t *)malloc(sizeof(cjose_jws_t));
+    jws = (cjose_jws_t *)cjose_get_alloc()(sizeof(cjose_jws_t));
     if (NULL == jws)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
@@ -488,7 +492,7 @@ static bool _cjose_jws_strcpy(
         int len,
         cjose_err *err)
 {
-    *dst = (char *)malloc(len + 1);
+    *dst = (char *)cjose_get_alloc()(len + 1);
     if (NULL == dst)
     {
         CJOSE_ERROR(err, CJOSE_ERR_INVALID_ARG);
@@ -518,7 +522,7 @@ cjose_jws_t *cjose_jws_import(
     }
 
     // allocate and initialize a new JWS object
-    jws = (cjose_jws_t *)malloc(sizeof(cjose_jws_t));
+    jws = (cjose_jws_t *)cjose_get_alloc()(sizeof(cjose_jws_t));
     if (NULL == jws)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
@@ -626,7 +630,7 @@ static bool _cjose_jws_verify_sig_ps256(
 
     // allocate buffer for encoded message
     em_len = RSA_size((RSA *)jwk->keydata);
-    em = (uint8_t *)malloc(em_len);
+    em = (uint8_t *)cjose_get_alloc()(em_len);
     if (NULL == em)
     {
         CJOSE_ERROR(err, CJOSE_ERR_CRYPTO);
@@ -691,7 +695,7 @@ static bool _cjose_jws_verify_sig_rs256(
 
     // allocate buffer for decrypted digest
     dig_len = RSA_size((RSA *)jwk->keydata);
-    dig = (uint8_t *)malloc(dig_len);
+    dig = (uint8_t *)cjose_get_alloc()(dig_len);
     if (NULL == dig)
     {
         CJOSE_ERROR(err, CJOSE_ERR_CRYPTO);

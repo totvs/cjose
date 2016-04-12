@@ -8,6 +8,7 @@
 #include "include/jwk_int.h"
 
 #include <cjose/base64.h>
+#include <cjose/util.h>
 
 #include <assert.h>
 #include <stdlib.h>
@@ -91,7 +92,7 @@ bool cjose_jwk_release(cjose_jwk_t *jwk)
     --(jwk->retained);
     if (0 == jwk->retained)
     {
-        free(jwk->kid);
+        cjose_get_dealloc()(jwk->kid);
         jwk->kid = NULL;
 
         // assumes freefunc is set
@@ -138,9 +139,9 @@ bool cjose_jwk_set_kid(
     }
     if (jwk->kid)
     {
-        free(jwk->kid);
+        cjose_get_dealloc()(jwk->kid);
     }    
-    jwk->kid = (char *)malloc(len+1);
+    jwk->kid = (char *)cjose_get_alloc()(len+1);
     if (!jwk->kid)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
@@ -216,7 +217,7 @@ char *cjose_jwk_to_json(const cjose_jwk_t *jwk, bool priv, cjose_err *err)
         goto to_json_cleanup;
     }
     result = strdup(str_jwk);
-    free(str_jwk);
+    cjose_get_dealloc()(str_jwk);
     
     to_json_cleanup:
     if (json)
@@ -250,7 +251,7 @@ static const key_fntable OCT_FNTABLE = {
 
 static cjose_jwk_t *_oct_new(uint8_t *buffer, size_t keysize, cjose_err *err)
 {
-    cjose_jwk_t *jwk = (cjose_jwk_t *)malloc(sizeof(cjose_jwk_t));
+    cjose_jwk_t *jwk = (cjose_jwk_t *)cjose_get_alloc()(sizeof(cjose_jwk_t));
     if (NULL == jwk)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
@@ -274,9 +275,9 @@ static void _oct_free(cjose_jwk_t *jwk)
     jwk->keydata =  NULL;
     if (buffer)
     {
-        free(buffer);
+        cjose_get_dealloc()(buffer);
     }
-    free(jwk);
+    cjose_get_dealloc()(jwk);
 }
 
 static bool _oct_public_fields(
@@ -300,7 +301,7 @@ static bool _oct_private_fields(
     }
 
     field = json_stringn(k, klen);
-    free(k);
+    cjose_get_dealloc()(k);
     k = NULL;
     if (!field)
     {
@@ -328,7 +329,7 @@ cjose_jwk_t *cjose_jwk_create_oct_random(size_t keysize, cjose_err *err)
     // resize to bytes
     size_t buffersize = sizeof(uint8_t) * (keysize / 8);
 
-    buffer = (uint8_t *)malloc(buffersize);
+    buffer = (uint8_t *)cjose_get_alloc()(buffersize);
     if (NULL == buffer)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
@@ -349,7 +350,7 @@ cjose_jwk_t *cjose_jwk_create_oct_random(size_t keysize, cjose_err *err)
     create_oct_failed:
     if (buffer)
     {
-        free(buffer);
+        cjose_get_dealloc()(buffer);
         buffer = NULL;
     }
 
@@ -368,7 +369,7 @@ cjose_jwk_t * cjose_jwk_create_oct_spec(
         goto create_oct_failed;
     }
 
-    buffer = (uint8_t *)malloc(len);
+    buffer = (uint8_t *)cjose_get_alloc()(len);
     if (!buffer)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
@@ -387,7 +388,7 @@ cjose_jwk_t * cjose_jwk_create_oct_spec(
     create_oct_failed:
     if (buffer)
     {
-        free(buffer);
+        cjose_get_dealloc()(buffer);
         buffer = NULL;
     }
 
@@ -489,7 +490,7 @@ static inline bool _kty_from_name(
 
 static cjose_jwk_t *_EC_new(cjose_jwk_ec_curve crv, EC_KEY *ec, cjose_err *err)
 {
-    ec_keydata *keydata = malloc(sizeof(ec_keydata));
+    ec_keydata *keydata = cjose_get_alloc()(sizeof(ec_keydata));
     if (!keydata)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
@@ -498,11 +499,11 @@ static cjose_jwk_t *_EC_new(cjose_jwk_ec_curve crv, EC_KEY *ec, cjose_err *err)
     keydata->crv = crv;
     keydata->key = ec;
 
-    cjose_jwk_t *jwk = malloc(sizeof(cjose_jwk_t));
+    cjose_jwk_t *jwk = cjose_get_alloc()(sizeof(cjose_jwk_t));
     if (!jwk)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
-        free(keydata);
+        cjose_get_dealloc()(keydata);
         return NULL;
     }
     memset(jwk, 0, sizeof(cjose_jwk_t));
@@ -538,9 +539,9 @@ static void _EC_free(cjose_jwk_t *jwk)
         {
             EC_KEY_free(ec);
         }
-        free(keydata);
+        cjose_get_dealloc()(keydata);
     }
-    free(jwk);
+    cjose_get_dealloc()(jwk);
 }
 
 static bool _EC_public_fields(
@@ -581,7 +582,7 @@ static bool _EC_public_fields(
         goto _ec_to_string_cleanup;
     }
 
-    buffer = malloc(numsize);
+    buffer = cjose_get_alloc()(numsize);
     bnX = BN_new();
     bnY = BN_new();
     if (!buffer || !bnX || !bnY)
@@ -612,7 +613,7 @@ static bool _EC_public_fields(
     json_object_set(json, "x", field);
     json_decref(field);
     field = NULL;
-    free(b64u);
+    cjose_get_dealloc()(b64u);
     b64u = NULL;
 
     // output the y coordinate
@@ -632,7 +633,7 @@ static bool _EC_public_fields(
     json_object_set(json, "y", field);
     json_decref(field);
     field = NULL;
-    free(b64u);
+    cjose_get_dealloc()(b64u);
     b64u = NULL;
 
     result = true;
@@ -652,11 +653,11 @@ static bool _EC_public_fields(
     }
     if (buffer)
     {
-        free(buffer);
+        cjose_get_dealloc()(buffer);
     }
     if (b64u)
     {
-        free(b64u);
+        cjose_get_dealloc()(b64u);
     }
 
     return result;
@@ -682,7 +683,7 @@ static bool _EC_private_fields(
         return true;
     }
 
-    buffer = malloc(numsize);
+    buffer = cjose_get_alloc()(numsize);
     if (!buffer)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
@@ -705,7 +706,7 @@ static bool _EC_private_fields(
     json_object_set(json, "d", field);
     json_decref(field);
     field = NULL;
-    free(b64u);
+    cjose_get_dealloc()(b64u);
     b64u = NULL;
 
     result = true;
@@ -713,7 +714,7 @@ static bool _EC_private_fields(
     _ec_to_string_cleanup:
     if (buffer)
     {
-        free(buffer);
+        cjose_get_dealloc()(buffer);
     }
 
     return result;
@@ -750,7 +751,7 @@ cjose_jwk_t *cjose_jwk_create_EC_random(cjose_jwk_ec_curve crv, cjose_err *err)
     create_EC_failed:
     if (jwk)
     {
-        free(jwk);
+        cjose_get_dealloc()(jwk);
         jwk = NULL;
     }
     if (ec)
@@ -877,7 +878,7 @@ cjose_jwk_t *cjose_jwk_create_EC_spec(
     create_EC_failed:
     if (jwk)
     {
-        free(jwk);
+        cjose_get_dealloc()(jwk);
         jwk = NULL;
     }
     if (ec)
@@ -928,7 +929,7 @@ static const key_fntable RSA_FNTABLE = {
 
 static inline cjose_jwk_t *_RSA_new(RSA *rsa, cjose_err *err)
 {
-    cjose_jwk_t *jwk = malloc(sizeof(cjose_jwk_t));
+    cjose_jwk_t *jwk = cjose_get_alloc()(sizeof(cjose_jwk_t));
     if (!jwk)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
@@ -952,7 +953,7 @@ static void _RSA_free(cjose_jwk_t *jwk)
     {
         RSA_free(rsa);
     }
-    free(jwk);
+    cjose_get_dealloc()(jwk);
 }
 
 static inline bool _RSA_json_field(
@@ -971,7 +972,7 @@ static inline bool _RSA_json_field(
     }
 
     datalen = BN_num_bytes(param);
-    data = malloc(sizeof(uint8_t) * datalen);
+    data = cjose_get_alloc()(sizeof(uint8_t) * datalen);
     if (!data)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
@@ -996,12 +997,12 @@ static inline bool _RSA_json_field(
     RSA_json_field_cleanup:
     if (b64u)
     {
-        free(b64u);
+        cjose_get_dealloc()(b64u);
         b64u = NULL;
     }
     if (data)
     {
-        free(data);
+        cjose_get_dealloc()(data);
         data = NULL;
     }
 
@@ -1355,15 +1356,15 @@ static cjose_jwk_t *_cjose_jwk_import_EC(json_t *jwk_json, cjose_err *err)
     import_EC_cleanup:
     if (NULL != x_buffer)
     {
-        free(x_buffer);
+        cjose_get_dealloc()(x_buffer);
     }
     if (NULL != y_buffer)
     {
-        free(y_buffer);
+        cjose_get_dealloc()(y_buffer);
     }
     if (NULL != d_buffer)
     {
-        free(d_buffer);
+        cjose_get_dealloc()(d_buffer);
     }
 
     return jwk;
@@ -1477,14 +1478,14 @@ static cjose_jwk_t *_cjose_jwk_import_RSA(json_t *jwk_json, cjose_err *err)
     jwk = cjose_jwk_create_RSA_spec(&rsa_keyspec, err);
 
     import_RSA_cleanup:
-    free(n_buffer);
-    free(e_buffer);
-    free(d_buffer);
-    free(p_buffer);
-    free(q_buffer);
-    free(dp_buffer);
-    free(dq_buffer);
-    free(qi_buffer);
+    cjose_get_dealloc()(n_buffer);
+    cjose_get_dealloc()(e_buffer);
+    cjose_get_dealloc()(d_buffer);
+    cjose_get_dealloc()(p_buffer);
+    cjose_get_dealloc()(q_buffer);
+    cjose_get_dealloc()(dp_buffer);
+    cjose_get_dealloc()(dq_buffer);
+    cjose_get_dealloc()(qi_buffer);
 
     return jwk;
 }
@@ -1509,7 +1510,7 @@ static cjose_jwk_t *_cjose_jwk_import_oct(json_t *jwk_json, cjose_err *err)
     import_oct_cleanup:
     if (NULL != k_buffer)
     {
-        free(k_buffer);
+        cjose_get_dealloc()(k_buffer);
     }
 
     return jwk;
@@ -1704,7 +1705,7 @@ cjose_jwk_t *cjose_jwk_derive_ecdh_ephemeral_key(
     }
 
     // allocate buffer for shared secret
-    secret = (uint8_t *)malloc(secret_len);
+    secret = (uint8_t *)cjose_get_alloc()(secret_len);
     if (NULL == secret)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
@@ -1721,7 +1722,7 @@ cjose_jwk_t *cjose_jwk_derive_ecdh_ephemeral_key(
 
     // HKDF of the DH shared secret (SHA256, no salt, no info, 256 bit expand)
     ephemeral_key_len = 32;
-    ephemeral_key = (uint8_t *)malloc(ephemeral_key_len);
+    ephemeral_key = (uint8_t *)cjose_get_alloc()(ephemeral_key_len);
     if (!cjose_jwk_hkdf(EVP_sha256(), (uint8_t *)"", 0, (uint8_t *)"", 0, 
             secret, secret_len, ephemeral_key, ephemeral_key_len, err))
     {
@@ -1740,8 +1741,8 @@ cjose_jwk_t *cjose_jwk_derive_ecdh_ephemeral_key(
     EVP_PKEY_CTX_free(ctx);
     EVP_PKEY_free(pkey_self);
     EVP_PKEY_free(pkey_peer);
-    free(secret);
-    free(ephemeral_key);
+    cjose_get_dealloc()(secret);
+    cjose_get_dealloc()(ephemeral_key);
 
     return jwk_ephemeral_key;
 
@@ -1764,8 +1765,8 @@ cjose_jwk_t *cjose_jwk_derive_ecdh_ephemeral_key(
     {
         cjose_jwk_release(jwk_ephemeral_key);
     }
-    free(secret);
-    free(ephemeral_key);
+    cjose_get_dealloc()(secret);
+    cjose_get_dealloc()(ephemeral_key);
     return NULL;
 }
 

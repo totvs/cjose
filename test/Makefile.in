@@ -103,11 +103,12 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 @HAVE_CHECK_TRUE@am__EXEEXT_1 = check_cjose$(EXEEXT)
 am__check_cjose_SOURCES_DIST = check_cjose.c check_version.c \
-	check_base64.c check_jwk.c check_jwe.c check_jws.c \
-	check_header.c
+	check_util.c check_base64.c check_jwk.c check_jwe.c \
+	check_jws.c check_header.c
 @HAVE_CHECK_TRUE@am_check_cjose_OBJECTS =  \
 @HAVE_CHECK_TRUE@	check_cjose-check_cjose.$(OBJEXT) \
 @HAVE_CHECK_TRUE@	check_cjose-check_version.$(OBJEXT) \
+@HAVE_CHECK_TRUE@	check_cjose-check_util.$(OBJEXT) \
 @HAVE_CHECK_TRUE@	check_cjose-check_base64.$(OBJEXT) \
 @HAVE_CHECK_TRUE@	check_cjose-check_jwk.$(OBJEXT) \
 @HAVE_CHECK_TRUE@	check_cjose-check_jwe.$(OBJEXT) \
@@ -542,6 +543,7 @@ top_srcdir = @top_srcdir@
 @HAVE_CHECK_TRUE@check_cjose_LDADD = $(top_builddir)/src/libcjose.la @CHECK_LIBS@
 @HAVE_CHECK_TRUE@check_cjose_SOURCES = check_cjose.c \
 @HAVE_CHECK_TRUE@                      check_version.c \
+@HAVE_CHECK_TRUE@                      check_util.c \
 @HAVE_CHECK_TRUE@                      check_base64.c \
 @HAVE_CHECK_TRUE@                      check_jwk.c \
 @HAVE_CHECK_TRUE@                      check_jwe.c \
@@ -607,6 +609,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/check_cjose-check_jwe.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/check_cjose-check_jwk.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/check_cjose-check_jws.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/check_cjose-check_util.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/check_cjose-check_version.Po@am__quote@
 
 .c.o:
@@ -657,6 +660,20 @@ check_cjose-check_version.obj: check_version.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='check_version.c' object='check_cjose-check_version.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(check_cjose_CFLAGS) $(CFLAGS) -c -o check_cjose-check_version.obj `if test -f 'check_version.c'; then $(CYGPATH_W) 'check_version.c'; else $(CYGPATH_W) '$(srcdir)/check_version.c'; fi`
+
+check_cjose-check_util.o: check_util.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(check_cjose_CFLAGS) $(CFLAGS) -MT check_cjose-check_util.o -MD -MP -MF $(DEPDIR)/check_cjose-check_util.Tpo -c -o check_cjose-check_util.o `test -f 'check_util.c' || echo '$(srcdir)/'`check_util.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/check_cjose-check_util.Tpo $(DEPDIR)/check_cjose-check_util.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='check_util.c' object='check_cjose-check_util.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(check_cjose_CFLAGS) $(CFLAGS) -c -o check_cjose-check_util.o `test -f 'check_util.c' || echo '$(srcdir)/'`check_util.c
+
+check_cjose-check_util.obj: check_util.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(check_cjose_CFLAGS) $(CFLAGS) -MT check_cjose-check_util.obj -MD -MP -MF $(DEPDIR)/check_cjose-check_util.Tpo -c -o check_cjose-check_util.obj `if test -f 'check_util.c'; then $(CYGPATH_W) 'check_util.c'; else $(CYGPATH_W) '$(srcdir)/check_util.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/check_cjose-check_util.Tpo $(DEPDIR)/check_cjose-check_util.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='check_util.c' object='check_cjose-check_util.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(check_cjose_CFLAGS) $(CFLAGS) -c -o check_cjose-check_util.obj `if test -f 'check_util.c'; then $(CYGPATH_W) 'check_util.c'; else $(CYGPATH_W) '$(srcdir)/check_util.c'; fi`
 
 check_cjose-check_base64.o: check_base64.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(check_cjose_CFLAGS) $(CFLAGS) -MT check_cjose-check_base64.o -MD -MP -MF $(DEPDIR)/check_cjose-check_base64.Tpo -c -o check_cjose-check_base64.o `test -f 'check_base64.c' || echo '$(srcdir)/'`check_base64.c

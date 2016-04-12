@@ -5,4 +5,5 @@ nobase_include_HEADERS = 	cjose/cjose.h \
 							cjose/jws.h \
 							cjose/header.h \
 							cjose/error.h \
+							cjose/util.h \
 							cjose/version.h
