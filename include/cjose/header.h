@@ -72,6 +72,17 @@ cjose_header_t *cjose_header_new(
 
 
 /**
+ * Retains an existing header object. Callers must use this method if the
+ * header will be used past the scope it was created in (e.g., from a
+ * `cjose_jws_t` object).
+ *
+ * \param header[in] the header object to be retained.
+ * \returns the retained header object
+ */
+cjose_header_t *cjose_header_retain(
+        cjose_header_t *header);
+
+/**
  * Releases an existing header object. Callers must use this method
  * to dispose of header rather than directly free'ing a cjose_header
  * object.

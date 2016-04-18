@@ -61,6 +61,8 @@ typedef struct _jwe_fntable_int
 // JWE object
 struct _cjose_jwe_int
 {
+	json_t *hdr;                            // header JSON object
+
 	struct _cjose_jwe_part_int part[5];     // the 5 JWE parts
 
 	uint8_t *cek;                           // content-encryption key

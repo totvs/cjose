@@ -45,7 +45,7 @@ typedef struct _cjose_jwe_int cjose_jwe_t;
  * (e.g. (dir), the provided JWK must be symmetric (e.g. oct).
  *
  * \param jwk [in] the key to use for encrypting the JWE.
- * \param header [in] additional header values to include in the JWE header.
+ * \param protected_header [in] additional header values to include in the JWE header.
  * \param plaintext [in] the plaintext to be encrypted in the JWE payload.
  * \param plaintext_len [in] the length of the plaintext.
  * \param err [out] An optional error object which can be used to get additional
@@ -54,7 +54,7 @@ typedef struct _cjose_jwe_int cjose_jwe_t;
  */
 cjose_jwe_t *cjose_jwe_encrypt(
         const cjose_jwk_t *jwk,
-        cjose_header_t *header,
+        cjose_header_t *protected_header,
         const uint8_t *plaintext,
         size_t plaintext_len,
         cjose_err *err);
@@ -114,6 +114,18 @@ uint8_t *cjose_jwe_decrypt(
         size_t *content_len,
         cjose_err *err);
 
+
+/**
+ * Returns the protected header of the JWE object.
+ *
+ * **NOTE:** The returned header is still owned by the JWE object. Users must
+ * call `cjose_header_retain()` if it is expected to be valid after the
+ * owning `cjose_jwe_t` is released.
+ *
+ * \param jwe [in] the JWE object for which the protected header is requested.
+ * \returns the (parsed) protected header
+ */
+cjose_header_t *cjose_jwe_get_protected(cjose_jwe_t *jwe);
 
 /**
  * Releases the given JWE object.

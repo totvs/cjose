@@ -79,7 +79,7 @@ static bool _cjose_jwe_malloc(
     {   
         if (RAND_bytes((unsigned char *)*buffer, bytes) != 1)
         {   
-            free(*buffer);
+            cjose_get_dealloc()(*buffer);
             CJOSE_ERROR(err, CJOSE_ERR_CRYPTO);
             return false;
         }   
@@ -98,6 +98,10 @@ static bool _cjose_jwe_build_hdr(
         cjose_header_t *header,
         cjose_err *err)
 {
+    // save header object as part of the JWE (and incr. refcount)
+    jwe->hdr = header;
+    json_incref(jwe->hdr);
+
     // serialize the header
     char *hdr_str = json_dumps(header, JSON_ENCODE_ANY | JSON_PRESERVE_ORDER);
     if (NULL == hdr_str)
@@ -569,14 +573,14 @@ static bool _cjose_jwe_decrypt_dat_a256gcm(
 ////////////////////////////////////////////////////////////////////////////////
 cjose_jwe_t *cjose_jwe_encrypt(
         const cjose_jwk_t *jwk,
-        cjose_header_t *header,
+        cjose_header_t *protected_header,
         const uint8_t *plaintext,
         size_t plaintext_len,
         cjose_err *err)
 {
     cjose_jwe_t *jwe = NULL;
 
-    if (NULL == jwk || NULL == header)
+    if (NULL == jwk || NULL == protected_header)
     {
         CJOSE_ERROR(err, CJOSE_ERR_INVALID_ARG);
         return NULL;
@@ -585,7 +589,7 @@ cjose_jwe_t *cjose_jwe_encrypt(
     // if not already set, add kid header to JWE to match that of JWK
     const char *kid = cjose_jwk_get_kid(jwk, err);
     if (NULL != kid) {
-        if (!cjose_header_set(header, CJOSE_HDR_KID, kid, err)) 
+        if (!cjose_header_set(protected_header, CJOSE_HDR_KID, kid, err)) 
         {
             CJOSE_ERROR(err, CJOSE_ERR_INVALID_STATE);
             return false;
@@ -599,14 +603,14 @@ cjose_jwe_t *cjose_jwe_encrypt(
     }
 
     // validate JWE header
-    if (!_cjose_jwe_validate_hdr(jwe, header, err))
+    if (!_cjose_jwe_validate_hdr(jwe, protected_header, err))
     {
         cjose_jwe_release(jwe);
         return NULL;
     }
 
     // build JWE header
-    if (!_cjose_jwe_build_hdr(jwe, header, err))
+    if (!_cjose_jwe_build_hdr(jwe, protected_header, err))
     {
         cjose_jwe_release(jwe);
         return NULL;
@@ -645,6 +649,11 @@ void cjose_jwe_release(
     {
         return;
     }
+    if (NULL != jwe->hdr)
+    {
+        json_decref(jwe->hdr);
+    }
+
     for (int i = 0; i < 5; ++i)
     {
         cjose_get_dealloc()(jwe->part[i].raw);
@@ -654,7 +663,6 @@ void cjose_jwe_release(
     cjose_get_dealloc()(jwe->dat);
     cjose_get_dealloc()(jwe);
 }
-
 
 ////////////////////////////////////////////////////////////////////////////////
 char *cjose_jwe_export(
@@ -797,9 +805,9 @@ cjose_jwe_t *cjose_jwe_import(
     }
 
     // deserialize JSON header
-    json_t *header = json_loadb(
-            (const char *)jwe->part[0].raw, jwe->part[0].raw_len, 0, NULL);
-    if (NULL == header)
+    jwe->hdr = json_loadb(
+               (const char *)jwe->part[0].raw, jwe->part[0].raw_len, 0, NULL);
+    if (NULL == jwe->hdr)
     {
         CJOSE_ERROR(err, CJOSE_ERR_INVALID_ARG);
         cjose_jwe_release(jwe);
@@ -807,14 +815,12 @@ cjose_jwe_t *cjose_jwe_import(
     }
 
     // validate the JSON header
-    if (!_cjose_jwe_validate_hdr(jwe, header, err))
+    if (!_cjose_jwe_validate_hdr(jwe, jwe->hdr, err))
     {
-        json_decref(header);
         CJOSE_ERROR(err, CJOSE_ERR_INVALID_ARG);
         cjose_jwe_release(jwe);
         return NULL;        
     }
-    json_decref(header);
 
     return jwe;
 }
@@ -852,4 +858,14 @@ uint8_t *cjose_jwe_decrypt(
     jwe->dat_len = 0;
 
     return content;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+cjose_header_t *cjose_jwe_get_protected(cjose_jwe_t *jwe)
+{
+    if (NULL == jwe)
+    {
+        return NULL;
+    }
+    return jwe->hdr;
 }

@@ -28,6 +28,21 @@ START_TEST(test_cjose_header_new_release)
 }
 END_TEST
 
+START_TEST(test_cjose_header_retain_release)
+{
+    cjose_err err;
+
+    cjose_header_t *header = cjose_header_new(&err);
+    ck_assert_msg(NULL != header, "cjose_header_new failed");
+
+    header = cjose_header_retain(header);
+    ck_assert_msg(NULL != header, "cjose_header_retain failed");
+
+    cjose_header_release(header);
+
+    cjose_header_release(header);
+}
+END_TEST
 
 START_TEST(test_cjose_header_set_get)
 {
@@ -70,6 +85,7 @@ Suite *cjose_header_suite()
 
     TCase *tc_header = tcase_create("core");
     tcase_add_test(tc_header, test_cjose_header_new_release);
+    tcase_add_test(tc_header, test_cjose_header_retain_release);
     tcase_add_test(tc_header, test_cjose_header_set_get);
     suite_add_tcase(suite, tc_header);
 

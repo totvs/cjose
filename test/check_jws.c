@@ -59,6 +59,7 @@ static void _self_sign_self_verify(
     ck_assert_msg(NULL != jws1, "cjose_jws_sign failed: "
             "%s, file: %s, function: %s, line: %ld", 
             err->message, err->file, err->function, err->line);
+    ck_assert(hdr == cjose_jws_get_protected(jws1));
 
     // get the compact serialization of JWS
     char *compact = NULL;
@@ -77,7 +78,7 @@ static void _self_sign_self_verify(
     // verify the deserialized JWS
     ck_assert_msg(cjose_jws_verify(jws2, jwk, err), "cjose_jws_verify failed");
 
-    // get the verifyed plaintext
+    // get the verified plaintext
     uint8_t *plain2 = NULL;
     size_t plain2_len = 0;
     ck_assert_msg(
@@ -85,6 +86,11 @@ static void _self_sign_self_verify(
             "cjose_jws_get_plaintext failed: "
             "%s, file: %s, function: %s, line: %ld", 
             err->message, err->file, err->function, err->line);
+
+    // confirm equal headers
+    ck_assert(json_equal(
+        cjose_jws_get_protected(jws1),
+        cjose_jws_get_protected(jws2)));
 
     // confirm plain2 == plain1
     ck_assert_msg(

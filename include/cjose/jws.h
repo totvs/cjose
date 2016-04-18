@@ -38,7 +38,7 @@ typedef struct _cjose_jws_int cjose_jws_t;
  * and JWK.
  *
  * \param jwk [in] the key to use for signing the JWS.
- * \param header [in] header values to include in the JWS header.
+ * \param protected_header [in] header values to include in the JWS header.
  * \param plaintext [in] the plaintext to be signed as the JWS payload.
  * \param plaintext_len [in] the length of the plaintext.
  * \param err [out] An optional error object which can be used to get additional
@@ -47,7 +47,7 @@ typedef struct _cjose_jws_int cjose_jws_t;
  */
 cjose_jws_t *cjose_jws_sign(
         const cjose_jwk_t *jwk,
-        cjose_header_t *header,
+        cjose_header_t *protected_header,
         const uint8_t *plaintext,
         size_t plaintext_len,
         cjose_err *err);
@@ -127,6 +127,18 @@ bool cjose_jws_get_plaintext(
         size_t *plaintext_len,
         cjose_err *err);
 
+
+/**
+ * Returns the protected header of the JWS payload.
+ *
+ * **NOTE:** The returned header is still owned by the JWS object. Users must
+ * call `cjose_header_retain()` if it is expected to be valid after the
+ * owning `cjose_jws_t` is released.
+ *
+ * \param jws [in] the JWS object for which the protected header is requested.
+ * \returns the (parsed) protected header
+ */
+cjose_header_t *cjose_jws_get_protected(cjose_jws_t *jws);
 
 /**
  * Releases the given JWS object.

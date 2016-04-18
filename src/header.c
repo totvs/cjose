@@ -37,6 +37,16 @@ cjose_header_t *cjose_header_new(
     return retval;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+cjose_header_t *cjose_header_retain(
+        cjose_header_t *header)
+{
+    if (NULL != header)
+    {
+        header = json_incref(header);
+    }
+    return header;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 void cjose_header_release(
