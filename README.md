@@ -26,7 +26,7 @@ Implementation of JOSE for C/C++
 
 As with most autoconf/automake projects:
 
-    git clone git@sqbu-github.cisco.com:mamille2/cjose.git
+    git clone https://github.com/cisco/cjose.git
     cd cjose
     ./configure && make
 
