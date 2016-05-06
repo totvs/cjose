@@ -302,7 +302,7 @@ top_srcdir = @top_srcdir@
 @DX_COND_doc_TRUE@@DX_COND_latex_TRUE@DX_INSTALL_LATEX = latex
 @DX_COND_doc_TRUE@@DX_COND_latex_TRUE@DX_FILES_LATEX = $(shell find latex -type f)
 @DX_COND_doc_TRUE@@DX_COND_latex_TRUE@DX_CLEAN_LATEX = $(DX_FILES_LATEX) latex
-@DX_COND_doc_TRUE@doxygendir = $(datadir)/docs
+@DX_COND_doc_TRUE@doxygendir = $(docdir)
 @DX_COND_doc_TRUE@nobase_doxygen_DATA = $(DX_FILES_HTML) $(DX_FILES_LATEX)
 all: all-am
 
@@ -442,8 +442,8 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-@DX_COND_doc_FALSE@install-data-local:
 @DX_COND_doc_FALSE@clean-local:
+@DX_COND_doc_FALSE@install-data-local:
 clean: clean-am
 
 clean-am: clean-generic clean-libtool clean-local mostlyclean-am

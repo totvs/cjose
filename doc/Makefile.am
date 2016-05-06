@@ -23,7 +23,7 @@ endif DX_COND_latex
 
 ## General instructions
 
-doxygendir = $(datadir)/docs
+doxygendir = $(docdir)
 
 nobase_doxygen_DATA = $(DX_FILES_HTML) $(DX_FILES_LATEX)
 
