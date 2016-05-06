@@ -1,5 +1,5 @@
 SUBDIRS = . include src doc test
-EXTRA_DIST = README.md LICENSE
+EXTRA_DIST = CHANGELOG.md README.md LICENSE
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = cjose.pc

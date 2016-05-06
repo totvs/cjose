@@ -378,7 +378,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = . include src doc test
-EXTRA_DIST = README.md LICENSE
+EXTRA_DIST = CHANGELOG.md README.md LICENSE
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = cjose.pc
 all: all-recursive
