@@ -14,11 +14,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <stdio.h>
 
 #include <openssl/bn.h>
-#include <openssl/ec.h>
-#include <openssl/ecdh.h>
-#include <openssl/ecdsa.h>
 #include <openssl/obj_mac.h>
 #include <openssl/rand.h>
 #include <openssl/rsa.h>
@@ -678,7 +676,8 @@ static bool _EC_private_fields(
     // track expected binary data size
     uint8_t     numsize = _ec_size_for_curve(keydata->crv, err);
 
-    if (!bnD)
+    // short circuit if 'd' is NULL or 0
+    if (!bnD || BN_is_zero(bnD))
     {
         return true;
     }

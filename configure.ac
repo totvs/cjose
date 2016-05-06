@@ -33,6 +33,7 @@ AC_ARG_WITH(
     [AS_HELP_STRING([--with-openssl],[Location where OpenSSL can be found])],
     [ LDFLAGS="$LDFLAGS -L$with_openssl/lib";
       CFLAGS="$CFLAGS -I$with_openssl/include/";
+      CPPFLAGS="$CPPFLAGS -I$with_openssl/include/";
       AC_MSG_RESULT([$with_openssl])
     ],
     [ AC_MSG_RESULT([no])]
@@ -44,6 +45,9 @@ AC_CHECK_LIB([crypto],
     [AC_MSG_ERROR([OpenSSL is missing; it is required for this software])]
 )
 
+##### Check for Fundamental EC #####
+AC_CHECK_HEADERS([openssl/fec.h])
+
 #### Find Jansson
 AC_MSG_CHECKING([for --with-jansson])
 AC_ARG_WITH(
@@ -51,6 +55,7 @@ AC_ARG_WITH(
     [AS_HELP_STRING([--with-jansson], [Location where Jansson can be found])],
     [ LDFLAGS="$LDFLAGS -L$with_jansson/lib";
       CFLAGS="$CFLAGS -I$with_jansson/include/";
+      CPPFLAGS="$CPPFLAGS -I$with_jansson/include/";
       AC_MSG_RESULT([$with_jansson])
     ],
     [ AC_MSG_RESULT([no])]

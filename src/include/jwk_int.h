@@ -8,7 +8,20 @@
 #include <cjose/jwk.h>
 
 #include <jansson.h>
+
+#ifdef HAVE_OPENSSL_FEC_H
+
+#include <openssl/fec.h>
+#include <openssl/fecdh.h>
+#include <openssl/fecdsa.h>
+
+#else
+
 #include <openssl/ec.h>
+#include <openssl/ecdh.h>
+#include <openssl/ecdsa.h>
+
+#endif
 
 #ifndef SRC_JWK_INT_H
 #define SRC_JWK_INT_H
