@@ -95,7 +95,9 @@ START_TEST (test_cjose_jwk_create_RSA_spec)
     ck_assert(1 == jwk->retained);
     ck_assert(CJOSE_JWK_KTY_RSA == jwk->kty);
     ck_assert(2048 == jwk->keysize);
+    ck_assert(cjose_jwk_get_keysize(jwk, &err) == jwk->keysize);
     ck_assert(NULL != jwk->keydata);
+    ck_assert(cjose_jwk_get_keydata(jwk, &err) == jwk->keydata);
     cjose_jwk_release(jwk);
 
     // only private
@@ -106,7 +108,9 @@ START_TEST (test_cjose_jwk_create_RSA_spec)
     ck_assert(1 == jwk->retained);
     ck_assert(CJOSE_JWK_KTY_RSA == jwk->kty);
     ck_assert(2048 == jwk->keysize);
+    ck_assert(cjose_jwk_get_keysize(jwk, &err) == jwk->keysize);
     ck_assert(NULL != jwk->keydata);
+    ck_assert(cjose_jwk_get_keydata(jwk, &err) == jwk->keydata);
     cjose_jwk_release(jwk);
 
     // minimal private
@@ -125,7 +129,9 @@ START_TEST (test_cjose_jwk_create_RSA_spec)
     ck_assert(1 == jwk->retained);
     ck_assert(CJOSE_JWK_KTY_RSA == jwk->kty);
     ck_assert(2048 == jwk->keysize);
+    ck_assert(cjose_jwk_get_keysize(jwk, &err) == jwk->keysize);
     ck_assert(NULL != jwk->keydata);
+    ck_assert(cjose_jwk_get_keydata(jwk, &err) == jwk->keydata);
     cjose_jwk_release(jwk);
 
     free(specPriv.n);
@@ -143,7 +149,9 @@ START_TEST (test_cjose_jwk_create_RSA_spec)
     ck_assert(1 == jwk->retained);
     ck_assert(CJOSE_JWK_KTY_RSA == jwk->kty);
     ck_assert(2048 == jwk->keysize);
+    ck_assert(cjose_jwk_get_keysize(jwk, &err) == jwk->keysize);
     ck_assert(NULL != jwk->keydata);
+    ck_assert(cjose_jwk_get_keydata(jwk, &err) == jwk->keydata);
     cjose_jwk_release(jwk);
 
     free(specPub.n);
@@ -167,7 +175,9 @@ START_TEST (test_cjose_jwk_create_RSA_random)
     ck_assert(1 == jwk->retained);
     ck_assert(CJOSE_JWK_KTY_RSA == jwk->kty);
     ck_assert(2048 == jwk->keysize);
+    ck_assert(cjose_jwk_get_keysize(jwk, &err) == jwk->keysize);
     ck_assert(NULL != jwk->keydata);
+    ck_assert(cjose_jwk_get_keydata(jwk, &err) == jwk->keydata);
 
     cjose_jwk_release(jwk);
 
@@ -178,7 +188,9 @@ START_TEST (test_cjose_jwk_create_RSA_random)
     ck_assert(1 == jwk->retained);
     ck_assert(CJOSE_JWK_KTY_RSA == jwk->kty);
     ck_assert(2048 == jwk->keysize);
+    ck_assert(cjose_jwk_get_keysize(jwk, &err) == jwk->keysize);
     ck_assert(NULL != jwk->keydata);
+    ck_assert(cjose_jwk_get_keydata(jwk, &err) == jwk->keydata);
 
     cjose_jwk_release(jwk);
 }
@@ -204,7 +216,9 @@ START_TEST (test_cjose_jwk_create_EC_P256_spec)
     ck_assert(1 == jwk->retained);
     ck_assert(CJOSE_JWK_KTY_EC == jwk->kty);
     ck_assert(256 == jwk->keysize);
+    ck_assert(cjose_jwk_get_keysize(jwk, &err) == jwk->keysize);
     ck_assert(NULL != jwk->keydata);
+    ck_assert(cjose_jwk_get_keydata(jwk, &err) == jwk->keydata);
     free(spec.d);
     free(spec.x);
     free(spec.y);
@@ -222,7 +236,9 @@ START_TEST (test_cjose_jwk_create_EC_P256_random)
     ck_assert(1 == jwk->retained);
     ck_assert(CJOSE_JWK_KTY_EC == jwk->kty);
     ck_assert(256 == jwk->keysize);
+    ck_assert(cjose_jwk_get_keysize(jwk, &err) == jwk->keysize);
     ck_assert(NULL != jwk->keydata);
+    ck_assert(cjose_jwk_get_keydata(jwk, &err) == jwk->keydata);
 
     // cleanup
     cjose_jwk_release(jwk);
@@ -249,7 +265,9 @@ START_TEST (test_cjose_jwk_create_EC_P384_spec)
     ck_assert(1 == jwk->retained);
     ck_assert(CJOSE_JWK_KTY_EC == jwk->kty);
     ck_assert(384 == jwk->keysize);
+    ck_assert(cjose_jwk_get_keysize(jwk, &err) == jwk->keysize);
     ck_assert(NULL != jwk->keydata);
+    ck_assert(cjose_jwk_get_keydata(jwk, &err) == jwk->keydata);
     free(spec.d);
     free(spec.x);
     free(spec.y);
@@ -267,7 +285,9 @@ START_TEST (test_cjose_jwk_create_EC_P384_random)
     ck_assert(1 == jwk->retained);
     ck_assert(CJOSE_JWK_KTY_EC == jwk->kty);
     ck_assert(384 == jwk->keysize);
+    ck_assert(cjose_jwk_get_keysize(jwk, &err) == jwk->keysize);
     ck_assert(NULL != jwk->keydata);
+    ck_assert(cjose_jwk_get_keydata(jwk, &err) == jwk->keydata);
 
     // cleanup
     cjose_jwk_release(jwk);
@@ -294,7 +314,9 @@ START_TEST (test_cjose_jwk_create_EC_P521_spec)
     ck_assert(1 == jwk->retained);
     ck_assert(CJOSE_JWK_KTY_EC == jwk->kty);
     ck_assert(521 == jwk->keysize);
+    ck_assert(cjose_jwk_get_keysize(jwk, &err) == jwk->keysize);
     ck_assert(NULL != jwk->keydata);
+    ck_assert(cjose_jwk_get_keydata(jwk, &err) == jwk->keydata);
     free(spec.d);
     free(spec.x);
     free(spec.y);
@@ -312,7 +334,9 @@ START_TEST (test_cjose_jwk_create_EC_P521_random)
     ck_assert(1 == jwk->retained);
     ck_assert(CJOSE_JWK_KTY_EC == jwk->kty);
     ck_assert(521 == jwk->keysize);
+    ck_assert(cjose_jwk_get_keysize(jwk, &err) == jwk->keysize);
     ck_assert(NULL != jwk->keydata);
+    ck_assert(cjose_jwk_get_keydata(jwk, &err) == jwk->keydata);
 
     // cleanup
     cjose_jwk_release(jwk);
@@ -333,7 +357,9 @@ START_TEST (test_cjose_jwk_create_oct_spec)
     ck_assert(1 == jwk->retained);
     ck_assert(CJOSE_JWK_KTY_OCT == jwk->kty);
     ck_assert(klen * 8 == jwk->keysize);
+    ck_assert(cjose_jwk_get_keysize(jwk, &err) == jwk->keysize);
     ck_assert(NULL != jwk->keydata);
+    ck_assert(cjose_jwk_get_keydata(jwk, &err) == jwk->keydata);
     ck_assert_bin_eq(k, jwk->keydata, klen);
     free(k);
 
@@ -350,7 +376,9 @@ START_TEST (test_cjose_jwk_create_oct_random)
     ck_assert(1 == jwk->retained);
     ck_assert(CJOSE_JWK_KTY_OCT == jwk->kty);
     ck_assert(128 == jwk->keysize);
+    ck_assert(cjose_jwk_get_keysize(jwk, &err) == jwk->keysize);
     ck_assert(NULL != jwk->keydata);
+    ck_assert(cjose_jwk_get_keydata(jwk, &err) == jwk->keydata);
 
     // cleanup
     cjose_jwk_release(jwk);
