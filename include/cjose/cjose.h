@@ -26,5 +26,6 @@
 #include "jwk.h"
 #include "jwe.h"
 #include "jws.h"
+#include "util.h"
 
 #endif  // CJOSE_CJOSE_H
