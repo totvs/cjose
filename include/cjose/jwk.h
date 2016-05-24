@@ -85,6 +85,28 @@ bool cjose_jwk_release(cjose_jwk_t *jwk);
 cjose_jwk_kty_t cjose_jwk_get_kty(const cjose_jwk_t *jwk, cjose_err *err);
 
 /**
+ * Retrieves the keysize of this JWK (in bits).
+ *
+ * \param jwk The JWK to retrieve the keysize of
+ * \param err [out] An optional error object which can be used to get additional
+ *        information in the event of an error.
+ * \returns The keysize for this JWK, in bits
+ */
+size_t cjose_jwk_get_keysize(const cjose_jwk_t *jwk, cjose_err *err);
+
+/**
+ * Retrieves the raw key data for this JWK.
+ *
+ * \b WARNING: this is the raw data specific to the key type, and could
+ * contain private key material.
+ * \b NOTE: This key data will be released when the key is released.
+ *
+ * \param jwk The JWK to retrieve key data from
+ * \returns The key data specific to the type of key
+ */
+void * cjose_jwk_get_keydata(const cjose_jwk_t *jwk, cjose_err *err);
+
+/**
  * Retrieves the key id for the given JWK object.  The string returned by
  * this call belongs to the JWK, caller should not attempt to free it.
  *

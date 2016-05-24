@@ -112,6 +112,25 @@ cjose_jwk_kty_t cjose_jwk_get_kty(const cjose_jwk_t *jwk, cjose_err *err)
 
     return jwk->kty;
 }
+size_t cjose_jwk_get_keysize(const cjose_jwk_t *jwk, cjose_err *err)
+{
+    if (!jwk)
+    {
+        CJOSE_ERROR(err, CJOSE_ERR_INVALID_ARG);
+        return 0;
+    }
+    return jwk->keysize;
+}
+
+void *cjose_jwk_get_keydata(const cjose_jwk_t *jwk, cjose_err *err)
+{
+    if (!jwk)
+    {
+        CJOSE_ERROR(err, CJOSE_ERR_INVALID_ARG);
+        return NULL;
+    }
+    return jwk->keydata;
+}
 
 const char *cjose_jwk_get_kid(const cjose_jwk_t *jwk, cjose_err *err)
 {
