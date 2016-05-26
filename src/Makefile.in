@@ -138,6 +138,9 @@ AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
+libcjose_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(libcjose_la_LDFLAGS) $(LDFLAGS) -o $@
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -347,6 +350,7 @@ top_srcdir = @top_srcdir@
 AM_CFLAGS = -std=gnu99 --pedantic -Wall -Werror -g -O2 -I$(top_builddir)/include
 lib_LTLIBRARIES = libcjose.la
 libcjose_la_CPPFLAGS = -I$(topdir)/include
+libcjose_la_LDFLAGS = -lm
 libcjose_la_SOURCES = version.c \
 					util.c \
 					base64.c \
@@ -430,7 +434,7 @@ clean-libLTLIBRARIES:
 	}
 
 libcjose.la: $(libcjose_la_OBJECTS) $(libcjose_la_DEPENDENCIES) $(EXTRA_libcjose_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(LINK) -rpath $(libdir) $(libcjose_la_OBJECTS) $(libcjose_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(libcjose_la_LINK) -rpath $(libdir) $(libcjose_la_OBJECTS) $(libcjose_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)

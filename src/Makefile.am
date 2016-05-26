@@ -2,6 +2,7 @@ AM_CFLAGS =-std=gnu99 --pedantic -Wall -Werror -g -O2 -I$(top_builddir)/include
 
 lib_LTLIBRARIES=libcjose.la
 libcjose_la_CPPFLAGS= -I$(topdir)/include
+libcjose_la_LDFLAGS= -lm
 libcjose_la_SOURCES=version.c \
 					util.c \
 					base64.c \

@@ -1,4 +1,18 @@
 <a name=""></a>
+# [0.3.0](https://github.com/linuxwolf/cjose/compare/0.2.0...0.3.0) (2016-05-26)
+
+
+### Update
+
+* expose more key information ([16cf34901bbff6791c20aa831c34660e510cc9ee](https://github.com/linuxwolf/cjose/commit/16cf34901bbff6791c20aa831c34660e510cc9ee))
+
+### Fix
+
+* missing 'util.h' in superheader ([02593fb83991651570ec50dd35d89fb4e747ec71](https://github.com/linuxwolf/cjose/commit/02593fb83991651570ec50dd35d89fb4e747ec71))
+
+
+
+<a name=""></a>
 # [0.2.0](https://github.com/cisco/cjose/compare/0.1.2...0.2.0) (2016-05-06)
 
 
