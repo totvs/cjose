@@ -547,6 +547,7 @@ START_TEST(test_cjose_jwk_to_json_rsa)
     ck_assert(NULL != json);
     ck_assert_str_eq(RSA_PUBLIC_JSON, json
     );
+    free(json);
 
     json = cjose_jwk_to_json(jwk, true, &err);
     ck_assert(NULL != json);
@@ -562,6 +563,7 @@ START_TEST(test_cjose_jwk_to_json_rsa)
             "}",
             json
     );
+    free(json);
 
     cjose_jwk_release(jwk);
 }
@@ -866,6 +868,7 @@ START_TEST(test_cjose_jwk_import_no_zero_termination)
         ck_assert_str_eq(JWK, jwk_str);
     }
 
+    free(jwk_str);
     json_decref(left_json);
     json_decref(right_json);
     cjose_jwk_release(jwk);
@@ -909,6 +912,7 @@ START_TEST(test_cjose_jwk_import_with_base64url_padding)
         ck_assert_str_eq(JWK_OUT, jwk_str);
     }
 
+    free(jwk_str);
     json_decref(left_json);
     json_decref(right_json);
     cjose_jwk_release(jwk);

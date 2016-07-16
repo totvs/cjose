@@ -181,6 +181,7 @@ START_TEST(test_cjose_base64url_encode)
     ck_assert(cjose_base64url_encode(input, inlen, &output, &outlen, &err));
     ck_assert_str_eq("", output);
     ck_assert(0 == outlen);
+    cjose_get_dealloc()(output);
 
     // invalid arguments -- output == NULL
     input = "valid";
