@@ -46,6 +46,11 @@ extern const char *CJOSE_HDR_ALG_PS256;
 /** The JWE algorithm attribute value for RS256. */
 extern const char *CJOSE_HDR_ALG_RS256;
 
+/** The JWE algorithm attribute values for HS256, HS384 and HS512. */
+extern const char *CJOSE_HDR_ALG_HS256;
+extern const char *CJOSE_HDR_ALG_HS384;
+extern const char *CJOSE_HDR_ALG_HS512;
+
 /** The JWE algorithm attribute value for "dir". */
 extern const char *CJOSE_HDR_ALG_DIR;
 

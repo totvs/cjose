@@ -17,6 +17,7 @@
 #include <openssl/evp.h>
 #include <openssl/rsa.h>
 #include <openssl/err.h>
+#include <openssl/hmac.h>
 
 #include "include/jwk_int.h"
 #include "include/header_int.h"
@@ -30,6 +31,11 @@ static bool _cjose_jws_build_dig_sha256(
         cjose_err *err);
 
 static bool _cjose_jws_build_sig_ps256(
+        cjose_jws_t *jws,
+        const cjose_jwk_t *jwk,
+        cjose_err *err);
+
+static bool _cjose_jws_build_dig_hmac_sha(
         cjose_jws_t *jws,
         const cjose_jwk_t *jwk,
         cjose_err *err);
@@ -49,6 +55,15 @@ static bool _cjose_jws_verify_sig_rs256(
         const cjose_jwk_t *jwk, 
         cjose_err *err);
 
+static bool _cjose_jws_build_sig_hmac_sha(
+        cjose_jws_t *jws,
+        const cjose_jwk_t *jwk,
+        cjose_err *err);
+
+static bool _cjose_jws_verify_sig_hmac_sha(
+        cjose_jws_t *jws,
+        const cjose_jwk_t *jwk,
+        cjose_err *err);
 
 ////////////////////////////////////////////////////////////////////////////////
 static bool _cjose_jws_build_hdr(
@@ -104,6 +119,12 @@ static bool _cjose_jws_validate_hdr(
         jws->fns.digest = _cjose_jws_build_dig_sha256;
         jws->fns.sign = _cjose_jws_build_sig_rs256;
         jws->fns.verify = _cjose_jws_verify_sig_rs256;
+    }
+    else if ( (strcmp(alg, CJOSE_HDR_ALG_HS256) == 0) || (strcmp(alg, CJOSE_HDR_ALG_HS384) == 0) || (strcmp(alg, CJOSE_HDR_ALG_HS512) == 0))
+    {
+        jws->fns.digest = _cjose_jws_build_dig_hmac_sha;
+        jws->fns.sign = _cjose_jws_build_sig_hmac_sha;
+        jws->fns.verify = _cjose_jws_verify_sig_hmac_sha;
     }
     else
     {
@@ -217,6 +238,96 @@ static bool _cjose_jws_build_dig_sha256(
     return retval;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+static bool _cjose_jws_build_dig_hmac_sha(
+        cjose_jws_t *jws,
+        const cjose_jwk_t *jwk,
+        cjose_err *err)
+{
+    bool retval = false;
+    HMAC_CTX *ctx = NULL;
+
+    // make sure we have an alg header
+    json_t *alg_obj = json_object_get(jws->hdr, CJOSE_HDR_ALG);
+    if (NULL == alg_obj)
+    {
+        CJOSE_ERROR(err, CJOSE_ERR_INVALID_ARG);
+        return false;
+    }
+    const char *alg = json_string_value(alg_obj);
+
+    // build digest using SHA-??? digest algorithm
+    const EVP_MD *digest_alg = NULL;
+    if (strcmp(alg, CJOSE_HDR_ALG_HS256) == 0)
+    	digest_alg = EVP_sha256();
+    else if (strcmp(alg, CJOSE_HDR_ALG_HS384) == 0)
+    	digest_alg = EVP_sha384();
+    else if (strcmp(alg, CJOSE_HDR_ALG_HS512) == 0)
+    	digest_alg = EVP_sha512();
+
+    if (NULL == digest_alg)
+    {
+        CJOSE_ERROR(err, CJOSE_ERR_CRYPTO);
+        goto _cjose_jws_build_dig_hmac_sha_cleanup;
+    }
+
+    // allocate buffer for digest
+    jws->dig_len = digest_alg->md_size;
+    jws->dig = (uint8_t *)cjose_get_alloc()(jws->dig_len);
+    if (NULL == jws->dig)
+    {
+        CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
+        goto _cjose_jws_build_dig_hmac_sha_cleanup;
+    }
+
+    // instantiate and initialize a new mac digest context
+    ctx = cjose_get_alloc()(sizeof(HMAC_CTX));
+    if (NULL == ctx)
+    {
+        CJOSE_ERROR(err, CJOSE_ERR_CRYPTO);
+        goto _cjose_jws_build_dig_hmac_sha_cleanup;
+    }
+    HMAC_CTX_init(ctx);
+
+    // create digest as DIGEST(B64U(HEADER).B64U(DATA))
+    if (HMAC_Init_ex(ctx, jwk->keydata, jwk->keysize / 8, digest_alg, NULL) != 1)
+    {
+        CJOSE_ERROR(err, CJOSE_ERR_CRYPTO);
+        goto _cjose_jws_build_dig_hmac_sha_cleanup;
+    }
+    if (HMAC_Update(ctx, (const unsigned char *)jws->hdr_b64u, jws->hdr_b64u_len) != 1)
+    {
+        CJOSE_ERROR(err, CJOSE_ERR_CRYPTO);
+        goto _cjose_jws_build_dig_hmac_sha_cleanup;
+    }
+    if (HMAC_Update(ctx, (const unsigned char *)".", 1) != 1)
+    {
+        CJOSE_ERROR(err, CJOSE_ERR_CRYPTO);
+        goto _cjose_jws_build_dig_hmac_sha_cleanup;
+    }
+    if (HMAC_Update(ctx, (const unsigned char *)jws->dat_b64u, jws->dat_b64u_len) != 1)
+    {
+        CJOSE_ERROR(err, CJOSE_ERR_CRYPTO);
+        goto _cjose_jws_build_dig_hmac_sha_cleanup;
+    }
+    if (HMAC_Final(ctx, jws->dig, NULL) != 1)
+    {
+        CJOSE_ERROR(err, CJOSE_ERR_CRYPTO);
+        goto _cjose_jws_build_dig_hmac_sha_cleanup;
+    }
+
+    // if we got this far - success
+    retval = true;
+
+    _cjose_jws_build_dig_hmac_sha_cleanup:
+    if (NULL != ctx)
+    {
+    	HMAC_CTX_cleanup(ctx);
+    	cjose_get_dealloc()(ctx);
+    }
+
+    return retval;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 static bool _cjose_jws_build_sig_ps256(
@@ -333,6 +444,39 @@ static bool _cjose_jws_build_sig_rs256(
     return true;
 }
 
+static bool _cjose_jws_build_sig_hmac_sha(
+        cjose_jws_t *jws,
+        const cjose_jwk_t *jwk,
+        cjose_err *err)
+{
+    // ensure jwk is OCT
+    if (jwk->kty != CJOSE_JWK_KTY_OCT)
+    {
+        CJOSE_ERROR(err, CJOSE_ERR_INVALID_ARG);
+        return false;
+    }
+
+    // allocate buffer for signature
+    jws->sig_len = jws->dig_len;
+    jws->sig = (uint8_t *)cjose_get_alloc()(jws->sig_len);
+    if (NULL == jws->sig)
+    {
+        CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
+        return false;
+    }
+
+    memcpy(jws->sig, jws->dig, jws->sig_len);
+
+    // base64url encode signed digest
+    if (!cjose_base64url_encode((const uint8_t *)jws->sig, jws->sig_len,
+            &jws->sig_b64u, &jws->sig_b64u_len, err))
+    {
+        CJOSE_ERROR(err, CJOSE_ERR_CRYPTO);
+        return false;
+    }
+
+    return true;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 static bool _cjose_jws_build_cser(
@@ -728,6 +872,36 @@ static bool _cjose_jws_verify_sig_rs256(
     return retval;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+static bool _cjose_jws_verify_sig_hmac_sha(
+            cjose_jws_t *jws,
+            const cjose_jwk_t *jwk,
+            cjose_err *err)
+{
+    bool retval = false;
+
+    // ensure jwk is OCT
+    if (jwk->kty != CJOSE_JWK_KTY_OCT)
+    {
+        CJOSE_ERROR(err, CJOSE_ERR_INVALID_ARG);
+        goto _cjose_jws_verify_sig_hmac_sha_cleanup;
+    }
+
+    // verify decrypted digest matches computed digest
+    if ((_const_memcmp(jws->dig, jws->sig, jws->dig_len) != 0) ||
+        (jws->sig_len != jws->dig_len))
+    {
+        CJOSE_ERROR(err, CJOSE_ERR_CRYPTO);
+        goto _cjose_jws_verify_sig_hmac_sha_cleanup;
+    }
+
+    // if we got this far - success
+    retval = true;
+
+    _cjose_jws_verify_sig_hmac_sha_cleanup:
+
+    return retval;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 bool cjose_jws_verify(
