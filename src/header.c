@@ -17,6 +17,9 @@ const char *CJOSE_HDR_ALG_RSA_OAEP = "RSA-OAEP";
 const char *CJOSE_HDR_ALG_DIR = "dir";
 const char *CJOSE_HDR_ALG_PS256 = "PS256";
 const char *CJOSE_HDR_ALG_RS256 = "RS256";
+const char *CJOSE_HDR_ALG_HS256 = "HS256";
+const char *CJOSE_HDR_ALG_HS384 = "HS384";
+const char *CJOSE_HDR_ALG_HS512 = "HS512";
 
 const char *CJOSE_HDR_ENC = "enc";
 const char *CJOSE_HDR_ENC_A256GCM = "A256GCM";

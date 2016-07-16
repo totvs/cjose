@@ -27,6 +27,10 @@ static const char *JWK_COMMON =
     "\"dq\": \"ZWB_5qJENrKO39aBW-Jf-_twihUPVi50oarRWml_iP40pVP01HDTqyiMut2tf6pUQGdF-nqulG2Mopei6Ell5wItf7s_bmnHPYysBuMrtov5PuknfVD7UqeEp25nZuZzF4aflyhovV29B-bM-_8CS0OIGb6TeTC5T5SflY17UNE\", "
     "\"qi\": \"RowmdelfiEBdqfBCSb3yblUKhwJsbyg6HtcugIVOC1yDxD5sZ0cjJPnXj7TJkrC0tICQ50MlPY5F650D9pvACIYnvrGEwsq757Lxg5nqshvuSC-7i1TMkv7_uPBmIxRfzqsnh_hVhxLgSUW1NI6_ncwk9vDQqpkY6qBirgvbyO0\" }";
 
+static const char *JWK_COMMON_OCT =
+    "{ \"kty\": \"oct\", "
+    "\"k\": \"AyM1SysPpbyDfgZld3umj1qzKObwVMkoqQ-EstJQLr_T-1qS0gZH75aKtMN3Yj0iPS4hcgUuTwjAzZr1Z9CAow\" }";
+
 // a JWS encrypted with the above JWK_COMMON key
 static const char *JWS_COMMON = 
         "eyAiYWxnIjogIlBTMjU2IiB9.SWYgeW91IHJldmVhbCB5b3VyIHNlY3JldHMgdG8gdGhlIHdpbmQsIHlvdSBzaG91bGQgbm90IGJsYW1lIHRoZSB3aW5kIGZvciByZXZlYWxpbmcgdGhlbSB0byB0aGUgdHJlZXMuIOKAlCBLYWhsaWwgR2licmFu.0YJo4r9gbI2nZ2_1_KLTY3i5SRcZvahRuToavqBvLbm87pN7IYx8YV9kwKQclMW2ASpbEAzKNIJfQ3FycobRwZGtqCI9sRUo0vQvkpb3HIS6HKp3Kvur57J7LcZhz7uNIxzUYNQSg4EWpwhF9FnGng7bmU8qjNPiXCWfQ-n74gopAVzd3KDJ5ai7q66voRc9pCKJVbsaIMHIqcl9OPiMdY5Hz3_PgBalR2632HOdpUlIMvnMOL3EQICvyBwxaYPbhMcCpEc3_4K-sywOGiCSp9KlaLcRq0knZtAT0ynJszaiOwfR-W18PEFLfGclpeR6e_gop9mq69t36wK7KRUjrQ";
@@ -37,10 +41,18 @@ static const char *PLAIN_COMMON =
          "wind for revealing them to the trees. — Kahlil Gibran";
 
 
+static const char *_self_get_jwt_by_alg(const char *alg) {
+	if ((strcmp(alg, CJOSE_HDR_ALG_HS256) == 0) || (strcmp(alg, CJOSE_HDR_ALG_HS384) == 0) || (strcmp(alg, CJOSE_HDR_ALG_HS512) == 0))
+		return JWK_COMMON_OCT;
+	return JWK_COMMON;
+}
+
 static void _self_sign_self_verify(
         const char *plain1, const char *alg, cjose_err *err)
 {
-    cjose_jwk_t *jwk = cjose_jwk_import(JWK_COMMON, strlen(JWK_COMMON), err);
+	const char *s_jwk = _self_get_jwt_by_alg(alg);
+    cjose_jwk_t *jwk = cjose_jwk_import(s_jwk, strlen(s_jwk), err);
+
     ck_assert_msg(NULL != jwk, "cjose_jwk_import failed: "
             "%s, file: %s, function: %s, line: %ld", 
             err->message, err->file, err->function, err->line);
@@ -113,6 +125,9 @@ START_TEST(test_cjose_jws_self_sign_self_verify)
     cjose_err err;
     _self_sign_self_verify(PLAIN_COMMON, CJOSE_HDR_ALG_PS256, &err);
     _self_sign_self_verify(PLAIN_COMMON, CJOSE_HDR_ALG_RS256, &err);
+    _self_sign_self_verify(PLAIN_COMMON, CJOSE_HDR_ALG_HS256, &err);
+    _self_sign_self_verify(PLAIN_COMMON, CJOSE_HDR_ALG_HS384, &err);
+    _self_sign_self_verify(PLAIN_COMMON, CJOSE_HDR_ALG_HS512, &err);
 }
 END_TEST
 
@@ -122,6 +137,9 @@ START_TEST(test_cjose_jws_self_sign_self_verify_short)
     cjose_err err;
     _self_sign_self_verify("Setec Astronomy", CJOSE_HDR_ALG_PS256, &err);
     _self_sign_self_verify("Setec Astronomy", CJOSE_HDR_ALG_RS256, &err);
+    _self_sign_self_verify("Setec Astronomy", CJOSE_HDR_ALG_HS256, &err);
+    _self_sign_self_verify("Setec Astronomy", CJOSE_HDR_ALG_HS384, &err);
+    _self_sign_self_verify("Setec Astronomy", CJOSE_HDR_ALG_HS512, &err);
 }
 END_TEST
 
@@ -131,6 +149,9 @@ START_TEST(test_cjose_jws_self_sign_self_verify_empty)
     cjose_err err;
     _self_sign_self_verify("", CJOSE_HDR_ALG_PS256, &err);
     _self_sign_self_verify("", CJOSE_HDR_ALG_RS256, &err);
+    _self_sign_self_verify("", CJOSE_HDR_ALG_HS256, &err);
+    _self_sign_self_verify("", CJOSE_HDR_ALG_HS384, &err);
+    _self_sign_self_verify("", CJOSE_HDR_ALG_HS512, &err);
 }
 END_TEST
 
@@ -148,6 +169,9 @@ START_TEST(test_cjose_jws_self_sign_self_verify_many)
         plain[len-1] = 0;
         _self_sign_self_verify(plain, CJOSE_HDR_ALG_PS256, &err);
         _self_sign_self_verify(plain, CJOSE_HDR_ALG_RS256, &err);
+        _self_sign_self_verify(plain, CJOSE_HDR_ALG_HS256, &err);
+        _self_sign_self_verify(plain, CJOSE_HDR_ALG_HS384, &err);
+        _self_sign_self_verify(plain, CJOSE_HDR_ALG_HS512, &err);
         free(plain);
     }
 }
