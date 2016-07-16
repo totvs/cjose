@@ -78,6 +78,7 @@ START_TEST(test_cjose_jwe_node_jose_encrypt_self_decrypt)
             strncmp(PLAINTEXT, plain2, plain2_len) == 0,
             "decrypted plaintext does not match encrypted plaintext");
 
+    cjose_get_dealloc()(plain2);
     cjose_jwk_release(jwk);
     cjose_jwe_release(jwe);
 }
@@ -152,6 +153,7 @@ static void _self_encrypt_self_decrypt_with_key(
             strncmp(plain1, plain2, plain2_len) == 0,
             "decrypted plaintext does not match encrypted plaintext");
 
+    cjose_get_dealloc()(plain2);
     cjose_header_release(hdr);
     cjose_jwe_release(jwe1);
     cjose_jwe_release(jwe2);

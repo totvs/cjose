@@ -983,6 +983,7 @@ START_TEST(test_cjose_jwk_hkdf)
         ck_assert_msg(
                 ephemeral_key[i] == expected[i], "HKDF failed on byte: %d", i);     
     }
+    free(ephemeral_key);
 }
 END_TEST
 
