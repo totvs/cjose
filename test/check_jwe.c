@@ -158,7 +158,7 @@ static void _self_encrypt_self_decrypt_with_key(
     cjose_jwe_release(jwe1);
     cjose_jwe_release(jwe2);
     cjose_jwk_release(jwk);
-    free(compact);
+    cjose_get_dealloc()(compact);
 }
 
 
@@ -451,7 +451,7 @@ START_TEST(test_cjose_jwe_import_export_compare)
 
     cjose_jwk_release(jwk);
     cjose_jwe_release(jwe);
-    free(cser);
+    cjose_get_dealloc()(cser);
 }
 END_TEST
 

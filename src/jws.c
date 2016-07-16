@@ -397,7 +397,7 @@ static bool _cjose_jws_build_sig_ps256(
     retval = true;
 
     _cjose_jws_build_sig_ps256_cleanup:
-    free(em);
+    cjose_get_dealloc()(em);
 
     return retval;
 }
@@ -596,14 +596,14 @@ void cjose_jws_release(cjose_jws_t *jws)
         json_decref(jws->hdr);
     }
 
-    free(jws->hdr_b64u);
-    free(jws->dat);
-    free(jws->dat_b64u);
-    free(jws->dig);
-    free(jws->sig);
-    free(jws->sig_b64u);
-    free(jws->cser);
-    free(jws);
+    cjose_get_dealloc()(jws->hdr_b64u);
+    cjose_get_dealloc()(jws->dat);
+    cjose_get_dealloc()(jws->dat_b64u);
+    cjose_get_dealloc()(jws->dig);
+    cjose_get_dealloc()(jws->sig);
+    cjose_get_dealloc()(jws->sig_b64u);
+    cjose_get_dealloc()(jws->cser);
+    cjose_get_dealloc()(jws);
 }
 
 
@@ -707,7 +707,7 @@ cjose_jws_t *cjose_jws_import(
 
     // deserialize JSON header
     jws->hdr = json_loadb((const char *)hdr_str, len, 0, NULL);
-    free(hdr_str);
+    cjose_get_dealloc()(hdr_str);
     if (NULL == jws->hdr)
     {
         CJOSE_ERROR(err, CJOSE_ERR_INVALID_ARG);
@@ -801,7 +801,7 @@ static bool _cjose_jws_verify_sig_ps256(
     retval = true;
 
     _cjose_jws_verify_sig_ps256_cleanup:
-    free(em);
+    cjose_get_dealloc()(em);
 
     return retval;
 }
@@ -867,7 +867,7 @@ static bool _cjose_jws_verify_sig_rs256(
     retval = true;
 
     _cjose_jws_verify_sig_rs256_cleanup:
-    free(dig);
+    cjose_get_dealloc()(dig);
 
     return retval;
 }
