@@ -1,6 +1,7 @@
 
 #include "check_cjose.h"
 #include <cjose/util.h>
+#include <check.h>
 #include <jansson.h>
 #include <stdlib.h>
 

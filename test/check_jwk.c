@@ -10,6 +10,7 @@
 #include <check.h>
 #include <cjose/jwk.h>
 #include <cjose/base64.h>
+#include <cjose/util.h>
 #include "include/jwk_int.h"
 
 /**
@@ -101,7 +102,7 @@ START_TEST (test_cjose_jwk_create_RSA_spec)
     cjose_jwk_release(jwk);
 
     // only private
-    free(specPriv.e);
+    cjose_get_dealloc()(specPriv.e);
     specPriv.e = NULL;
     jwk = cjose_jwk_create_RSA_spec(&specPriv, &err);
     ck_assert(NULL != jwk);
@@ -114,15 +115,15 @@ START_TEST (test_cjose_jwk_create_RSA_spec)
     cjose_jwk_release(jwk);
 
     // minimal private
-    free(specPriv.p);
+    cjose_get_dealloc()(specPriv.p);
     specPriv.p = NULL;
-    free(specPriv.q);
+    cjose_get_dealloc()(specPriv.q);
     specPriv.q = NULL;
-    free(specPriv.dp);
+    cjose_get_dealloc()(specPriv.dp);
     specPriv.dp = NULL;
-    free(specPriv.dq);
+    cjose_get_dealloc()(specPriv.dq);
     specPriv.dq = NULL;
-    free(specPriv.qi);
+    cjose_get_dealloc()(specPriv.qi);
     specPriv.qi = NULL;
     jwk = cjose_jwk_create_RSA_spec(&specPriv, &err);
     ck_assert(NULL != jwk);
@@ -134,9 +135,9 @@ START_TEST (test_cjose_jwk_create_RSA_spec)
     ck_assert(cjose_jwk_get_keydata(jwk, &err) == jwk->keydata);
     cjose_jwk_release(jwk);
 
-    free(specPriv.n);
+    cjose_get_dealloc()(specPriv.n);
     specPriv.n = NULL;
-    free(specPriv.d);
+    cjose_get_dealloc()(specPriv.d);
     specPriv.d = NULL;
 
     // public only
@@ -154,9 +155,9 @@ START_TEST (test_cjose_jwk_create_RSA_spec)
     ck_assert(cjose_jwk_get_keydata(jwk, &err) == jwk->keydata);
     cjose_jwk_release(jwk);
 
-    free(specPub.n);
+    cjose_get_dealloc()(specPub.n);
     specPub.n = NULL;
-    free(specPub.e);
+    cjose_get_dealloc()(specPub.e);
     specPub.e = NULL;
 }
 END_TEST
@@ -219,9 +220,9 @@ START_TEST (test_cjose_jwk_create_EC_P256_spec)
     ck_assert(cjose_jwk_get_keysize(jwk, &err) == jwk->keysize);
     ck_assert(NULL != jwk->keydata);
     ck_assert(cjose_jwk_get_keydata(jwk, &err) == jwk->keydata);
-    free(spec.d);
-    free(spec.x);
-    free(spec.y);
+    cjose_get_dealloc()(spec.d);
+    cjose_get_dealloc()(spec.x);
+    cjose_get_dealloc()(spec.y);
 
     // cleanup
     cjose_jwk_release(jwk);
@@ -268,9 +269,9 @@ START_TEST (test_cjose_jwk_create_EC_P384_spec)
     ck_assert(cjose_jwk_get_keysize(jwk, &err) == jwk->keysize);
     ck_assert(NULL != jwk->keydata);
     ck_assert(cjose_jwk_get_keydata(jwk, &err) == jwk->keydata);
-    free(spec.d);
-    free(spec.x);
-    free(spec.y);
+    cjose_get_dealloc()(spec.d);
+    cjose_get_dealloc()(spec.x);
+    cjose_get_dealloc()(spec.y);
 
     // cleanup
     cjose_jwk_release(jwk);
@@ -361,7 +362,7 @@ START_TEST (test_cjose_jwk_create_oct_spec)
     ck_assert(NULL != jwk->keydata);
     ck_assert(cjose_jwk_get_keydata(jwk, &err) == jwk->keydata);
     ck_assert_bin_eq(k, jwk->keydata, klen);
-    free(k);
+    cjose_get_dealloc()(k);
 
     // cleanup
     cjose_jwk_release(jwk);
@@ -455,7 +456,7 @@ START_TEST(test_cjose_jwk_to_json_oct)
 
     cjose_base64url_decode(OCT_KEY, strlen(OCT_KEY), &k, &klen, &err);
     jwk = cjose_jwk_create_oct_spec(k, klen, &err);
-    free(k);
+    cjose_get_dealloc()(k);
 
     const char *json;
     json = cjose_jwk_to_json(jwk, false, &err);
@@ -484,9 +485,9 @@ START_TEST(test_cjose_jwk_to_json_ec)
     cjose_base64url_decode(EC_P256_y, strlen(EC_P256_y), &spec.y, &spec.ylen, &err);
 
     jwk = cjose_jwk_create_EC_spec(&spec, &err);
-    free(spec.d);
-    free(spec.x);
-    free(spec.y);
+    cjose_get_dealloc()(spec.d);
+    cjose_get_dealloc()(spec.x);
+    cjose_get_dealloc()(spec.y);
 
     const char *json;
     json = cjose_jwk_to_json(jwk, false, &err);
@@ -532,20 +533,21 @@ START_TEST(test_cjose_jwk_to_json_rsa)
     cjose_base64url_decode(RSA_qi, strlen(RSA_qi), &spec.qi, &spec.qilen, &err);
 
     jwk = cjose_jwk_create_RSA_spec(&spec, &err);
-    free(spec.e);
-    free(spec.n);
-    free(spec.d);
-    free(spec.p);
-    free(spec.q);
-    free(spec.dp);
-    free(spec.dq);
-    free(spec.qi);
+    cjose_get_dealloc()(spec.e);
+    cjose_get_dealloc()(spec.n);
+    cjose_get_dealloc()(spec.d);
+    cjose_get_dealloc()(spec.p);
+    cjose_get_dealloc()(spec.q);
+    cjose_get_dealloc()(spec.dp);
+    cjose_get_dealloc()(spec.dq);
+    cjose_get_dealloc()(spec.qi);
 
     const char *json;
     json = cjose_jwk_to_json(jwk, false, &err);
     ck_assert(NULL != json);
     ck_assert_str_eq(RSA_PUBLIC_JSON, json
     );
+    free(json);
 
     json = cjose_jwk_to_json(jwk, true, &err);
     ck_assert(NULL != json);
@@ -561,6 +563,7 @@ START_TEST(test_cjose_jwk_to_json_rsa)
             "}",
             json
     );
+    free(json);
 
     cjose_jwk_release(jwk);
 }
@@ -865,6 +868,7 @@ START_TEST(test_cjose_jwk_import_no_zero_termination)
         ck_assert_str_eq(JWK, jwk_str);
     }
 
+    free(jwk_str);
     json_decref(left_json);
     json_decref(right_json);
     cjose_jwk_release(jwk);
@@ -908,6 +912,7 @@ START_TEST(test_cjose_jwk_import_with_base64url_padding)
         ck_assert_str_eq(JWK_OUT, jwk_str);
     }
 
+    free(jwk_str);
     json_decref(left_json);
     json_decref(right_json);
     cjose_jwk_release(jwk);
@@ -983,6 +988,7 @@ START_TEST(test_cjose_jwk_hkdf)
         ck_assert_msg(
                 ephemeral_key[i] == expected[i], "HKDF failed on byte: %d", i);     
     }
+    free(ephemeral_key);
 }
 END_TEST
 
