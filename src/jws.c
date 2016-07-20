@@ -65,6 +65,16 @@ static bool _cjose_jws_verify_sig_hmac_sha(
         const cjose_jwk_t *jwk,
         cjose_err *err);
 
+static bool _cjose_jws_build_sig_ec(
+        cjose_jws_t *jws,
+        const cjose_jwk_t *jwk,
+        cjose_err *err);
+
+static bool _cjose_jws_verify_sig_ec(
+        cjose_jws_t *jws,
+        const cjose_jwk_t *jwk,
+        cjose_err *err);
+
 ////////////////////////////////////////////////////////////////////////////////
 static bool _cjose_jws_build_hdr(
         cjose_jws_t *jws, 
@@ -126,6 +136,12 @@ static bool _cjose_jws_validate_hdr(
         jws->fns.sign = _cjose_jws_build_sig_hmac_sha;
         jws->fns.verify = _cjose_jws_verify_sig_hmac_sha;
     }
+    else if ((strcmp(alg, CJOSE_HDR_ALG_ES256) == 0) || (strcmp(alg, CJOSE_HDR_ALG_ES384) == 0) || (strcmp(alg, CJOSE_HDR_ALG_ES512) == 0))
+    {
+        jws->fns.digest = _cjose_jws_build_dig_sha;
+        jws->fns.sign = _cjose_jws_build_sig_ec;
+        jws->fns.verify = _cjose_jws_verify_sig_ec;
+    }
     else
     {
         CJOSE_ERROR(err, CJOSE_ERR_INVALID_ARG);
@@ -184,11 +200,11 @@ static bool _cjose_jws_build_dig_sha(
 
     // build digest using SHA-256/384/512 digest algorithm
     const EVP_MD *digest_alg = NULL;
-    if ((strcmp(alg, CJOSE_HDR_ALG_RS256) == 0) || (strcmp(alg, CJOSE_HDR_ALG_PS256) == 0))
+    if ((strcmp(alg, CJOSE_HDR_ALG_RS256) == 0) || (strcmp(alg, CJOSE_HDR_ALG_PS256) == 0) || (strcmp(alg, CJOSE_HDR_ALG_ES256) == 0))
     	digest_alg = EVP_sha256();
-    else if ((strcmp(alg, CJOSE_HDR_ALG_RS384) == 0) || (strcmp(alg, CJOSE_HDR_ALG_PS384) == 0))
+    else if ((strcmp(alg, CJOSE_HDR_ALG_RS384) == 0) || (strcmp(alg, CJOSE_HDR_ALG_PS384) == 0) || (strcmp(alg, CJOSE_HDR_ALG_ES384) == 0))
     	digest_alg = EVP_sha384();
-    else if ((strcmp(alg, CJOSE_HDR_ALG_RS512) == 0) || (strcmp(alg, CJOSE_HDR_ALG_PS512) == 0))
+    else if ((strcmp(alg, CJOSE_HDR_ALG_RS512) == 0) || (strcmp(alg, CJOSE_HDR_ALG_PS512) == 0) || (strcmp(alg, CJOSE_HDR_ALG_ES512) == 0))
     	digest_alg = EVP_sha512();
 
     if (NULL == digest_alg)
@@ -519,6 +535,66 @@ static bool _cjose_jws_build_sig_hmac_sha(
     }
 
     memcpy(jws->sig, jws->dig, jws->sig_len);
+
+    // base64url encode signed digest
+    if (!cjose_base64url_encode((const uint8_t *)jws->sig, jws->sig_len,
+            &jws->sig_b64u, &jws->sig_b64u_len, err))
+    {
+        CJOSE_ERROR(err, CJOSE_ERR_CRYPTO);
+        return false;
+    }
+
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+static bool _cjose_jws_build_sig_ec(
+        cjose_jws_t *jws,
+        const cjose_jwk_t *jwk,
+        cjose_err *err)
+{
+    // ensure jwk is EC
+    if (jwk->kty != CJOSE_JWK_KTY_EC)
+    {
+        CJOSE_ERROR(err, CJOSE_ERR_INVALID_ARG);
+        return false;
+    }
+
+    ec_keydata  *keydata = (ec_keydata *)jwk->keydata;
+    EC_KEY  *ec = keydata->key;
+
+    ECDSA_SIG *ecdsa_sig = ECDSA_do_sign(jws->dig, jws->dig_len, ec);
+    if (NULL == ecdsa_sig)
+    {
+        CJOSE_ERROR(err, CJOSE_ERR_CRYPTO);
+        return false;
+    }
+
+    // allocate buffer for signature
+    switch (keydata->crv) {
+        case CJOSE_JWK_EC_P_256:
+        	jws->sig_len = 32 * 2;
+        	break;
+        case CJOSE_JWK_EC_P_384:
+            jws->sig_len = 48 * 2;
+            break;
+        case CJOSE_JWK_EC_P_521:
+            jws->sig_len = 66 * 2;
+            break;
+    }
+
+    jws->sig = (uint8_t *)cjose_get_alloc()(jws->sig_len);
+    if (NULL == jws->sig)
+    {
+        CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
+        return false;
+    }
+
+    memset(jws->sig, 0, jws->sig_len);
+    int rlen = BN_num_bytes(ecdsa_sig->r);
+    int slen = BN_num_bytes(ecdsa_sig->s);
+    BN_bn2bin(ecdsa_sig->r, jws->sig + jws->sig_len / 2 - rlen);
+    BN_bn2bin(ecdsa_sig->s, jws->sig + jws->sig_len - slen);
 
     // base64url encode signed digest
     if (!cjose_base64url_encode((const uint8_t *)jws->sig, jws->sig_len,
@@ -966,6 +1042,45 @@ static bool _cjose_jws_verify_sig_hmac_sha(
     retval = true;
 
     _cjose_jws_verify_sig_hmac_sha_cleanup:
+
+    return retval;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+static bool _cjose_jws_verify_sig_ec(
+            cjose_jws_t *jws,
+            const cjose_jwk_t *jwk,
+            cjose_err *err)
+{
+    bool retval = false;
+
+    // ensure jwk is EC
+    if (jwk->kty != CJOSE_JWK_KTY_EC)
+    {
+        CJOSE_ERROR(err, CJOSE_ERR_INVALID_ARG);
+        return false;
+    }
+
+    ec_keydata  *keydata = (ec_keydata *)jwk->keydata;
+    EC_KEY  *ec = keydata->key;
+
+    ECDSA_SIG *ecdsa_sig = ECDSA_SIG_new();
+    int key_len = jws->sig_len / 2;
+    BN_bin2bn(jws->sig, key_len, ecdsa_sig->r);
+    BN_bin2bn(jws->sig + key_len, key_len, ecdsa_sig->s);
+
+    if (ECDSA_do_verify(jws->dig, jws->dig_len, ecdsa_sig, ec) != 1)
+    {
+        CJOSE_ERROR(err, CJOSE_ERR_CRYPTO);
+        goto _cjose_jws_verify_sig_ec_cleanup;
+    }
+
+    // if we got this far - success
+    retval = true;
+
+    _cjose_jws_verify_sig_ec_cleanup:
+    if (ecdsa_sig)
+        ECDSA_SIG_free(ecdsa_sig);
 
     return retval;
 }

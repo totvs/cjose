@@ -24,6 +24,9 @@ const char *CJOSE_HDR_ALG_RS512 = "RS512";
 const char *CJOSE_HDR_ALG_HS256 = "HS256";
 const char *CJOSE_HDR_ALG_HS384 = "HS384";
 const char *CJOSE_HDR_ALG_HS512 = "HS512";
+const char *CJOSE_HDR_ALG_ES256 = "ES256";
+const char *CJOSE_HDR_ALG_ES384 = "ES384";
+const char *CJOSE_HDR_ALG_ES512 = "ES512";
 
 const char *CJOSE_HDR_ENC = "enc";
 const char *CJOSE_HDR_ENC_A256GCM = "A256GCM";
