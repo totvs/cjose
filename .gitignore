@@ -47,3 +47,5 @@ test/*.trs
 *.sublime-project
 *.sublime-workspace
 *-e
+/.project
+/.cproject
