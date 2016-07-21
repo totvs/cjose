@@ -40,6 +40,11 @@ extern const char *CJOSE_HDR_KID;
 /** The JWE algorithm attribute value for RSA-OAEP. */
 extern const char *CJOSE_HDR_ALG_RSA_OAEP;
 
+/** The JWE algorithm attribute value for A128KW, A192KW and A256KW. */
+extern const char *CJOSE_HDR_ALG_A128KW;
+extern const char *CJOSE_HDR_ALG_A192KW;
+extern const char *CJOSE_HDR_ALG_A256KW;
+
 /** The JWS algorithm attribute value for PS256, PS384 and PS512. */
 extern const char *CJOSE_HDR_ALG_PS256;
 extern const char *CJOSE_HDR_ALG_PS384;
@@ -65,6 +70,11 @@ extern const char *CJOSE_HDR_ALG_DIR;
 
 /** The JWE content encryption algorithm value for A256GCM. */
 extern const char *CJOSE_HDR_ENC_A256GCM;
+
+/** The JWE content encryption algorithm value for A128CBC-HS256, A192CBC-HS384 and A256CBC-HS512. */
+extern const char *CJOSE_HDR_ENC_A128CBC_HS256;
+extern const char *CJOSE_HDR_ENC_A192CBC_HS384;
+extern const char *CJOSE_HDR_ENC_A256CBC_HS512;
 
 
 /**

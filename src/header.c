@@ -14,6 +14,9 @@
 
 const char *CJOSE_HDR_ALG = "alg";
 const char *CJOSE_HDR_ALG_RSA_OAEP = "RSA-OAEP";
+const char *CJOSE_HDR_ALG_A128KW = "A128KW";
+const char *CJOSE_HDR_ALG_A192KW = "A192KW";
+const char *CJOSE_HDR_ALG_A256KW = "A256KW";
 const char *CJOSE_HDR_ALG_DIR = "dir";
 const char *CJOSE_HDR_ALG_PS256 = "PS256";
 const char *CJOSE_HDR_ALG_PS384 = "PS384";
@@ -30,6 +33,9 @@ const char *CJOSE_HDR_ALG_ES512 = "ES512";
 
 const char *CJOSE_HDR_ENC = "enc";
 const char *CJOSE_HDR_ENC_A256GCM = "A256GCM";
+const char *CJOSE_HDR_ENC_A128CBC_HS256 = "A128CBC-HS256";
+const char *CJOSE_HDR_ENC_A192CBC_HS384 = "A192CBC-HS384";
+const char *CJOSE_HDR_ENC_A256CBC_HS512 = "A256CBC-HS512";
 
 const char *CJOSE_HDR_CTY = "cty";
 

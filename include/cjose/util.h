@@ -15,6 +15,7 @@
 #define CJOSE_UTIL_H
 
 #include <stddef.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -79,6 +80,18 @@ cjose_realloc_fn_t cjose_get_realloc();
  * \returns The configured deallocator function
  */
 cjose_dealloc_fn_t cjose_get_dealloc();
+
+/**
+ * Compares the first n bytes of the memory areas s1 and s2 in constant time.
+ *
+ * \returns an  integer  less  than,  equal  to,  or
+ *        greater than zero if the first n bytes of s1 is found, respectively, to
+ *        be less than, to match, or be greater than the first n bytes of s2
+ */
+int cjose_const_memcmp(
+        const uint8_t *a,
+        const uint8_t *b,
+        const size_t size);
 
 #ifdef __cplusplus
 }
