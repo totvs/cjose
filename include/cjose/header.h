@@ -55,6 +55,11 @@ extern const char *CJOSE_HDR_ALG_HS256;
 extern const char *CJOSE_HDR_ALG_HS384;
 extern const char *CJOSE_HDR_ALG_HS512;
 
+/** The JWS algorithm attribute values for ES256, ES384 and ES512. */
+extern const char *CJOSE_HDR_ALG_ES256;
+extern const char *CJOSE_HDR_ALG_ES384;
+extern const char *CJOSE_HDR_ALG_ES512;
+
 /** The JWE algorithm attribute value for "dir". */
 extern const char *CJOSE_HDR_ALG_DIR;
 
