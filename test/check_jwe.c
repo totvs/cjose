@@ -175,6 +175,24 @@ static void _self_encrypt_self_decrypt(const char *plain1)
             CJOSE_HDR_ENC_A256GCM, 
             JWK_OCT, 
             plain1); 
+
+    _self_encrypt_self_decrypt_with_key(
+    		CJOSE_HDR_ALG_A128KW,
+    		CJOSE_HDR_ENC_A128CBC_HS256,
+            JWK_OCT,
+            plain1);
+
+    _self_encrypt_self_decrypt_with_key(
+    		CJOSE_HDR_ALG_A192KW,
+    		CJOSE_HDR_ENC_A192CBC_HS384,
+            JWK_OCT,
+            plain1);
+
+    _self_encrypt_self_decrypt_with_key(
+    		CJOSE_HDR_ALG_A256KW,
+    		CJOSE_HDR_ENC_A256CBC_HS512,
+            JWK_OCT,
+            plain1);
 }
 
 
@@ -556,6 +574,168 @@ START_TEST(test_cjose_jwe_decrypt_bad_params)
 END_TEST
 
 
+START_TEST(test_cjose_jwe_decrypt_aes)
+{
+    // https://tools.ietf.org/html/rfc7516#appendix-A.3
+	// JWE Using AES Key Wrap and AES_128_CBC_HMAC_SHA_256
+    static const char *JWK_S = "{\"kty\":\"oct\", \"k\":\"GawgguFyGrWKav7AX4VKUg\"}";
+    static const char *JWE_S =
+    		"eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0."
+			"6KB707dM9YTIgHtLvtgWQ8mKwboJW3of9locizkDTHzBC2IlrT1oOQ."
+			"AxY8DCtDaGlsbGljb3RoZQ."
+			"KDlTtXchhZTGufMYmOYGS4HffxPSUrfmqCHXaI9wOGY."
+			"U0m_YmjN04DJvceFICbCVQ";
+    static const char *PLAINTEXT_S = "Live long and prosper.";
+
+    cjose_err err;
+
+    // import the JWK
+    cjose_jwk_t *jwk = cjose_jwk_import(JWK_S, strlen(JWK_S), &err);
+    ck_assert_msg(NULL != jwk, "cjose_jwk_import failed: "
+            "%s, file: %s, function: %s, line: %ld",
+            err.message, err.file, err.function, err.line);
+
+    // import the JWE
+    cjose_jwe_t *jwe = cjose_jwe_import(JWE_S, strlen(JWE_S), &err);
+    ck_assert_msg(NULL != jwe, "cjose_jwe_import failed: "
+            "%s, file: %s, function: %s, line: %ld",
+            err.message, err.file, err.function, err.line);
+
+    // decrypt the imported JWE
+    size_t plain1_len = 0;
+    uint8_t *plain1 = cjose_jwe_decrypt(jwe, jwk, &plain1_len, &err);
+    ck_assert_msg(
+            NULL != plain1,
+            "cjose_jwe_get_plaintext failed: "
+            "%s, file: %s, function: %s, line: %ld",
+            err.message, err.file, err.function, err.line);
+
+    // confirm plain == PLAINTEXT_S
+    ck_assert_msg(
+            plain1_len == strlen(PLAINTEXT_S),
+            "length of decrypted plaintext does not match length of original, "
+            "expected: %lu, found: %lu", strlen(PLAINTEXT_S), plain1_len);
+    ck_assert_msg(
+            strncmp(PLAINTEXT_S, plain1, plain1_len) == 0,
+            "decrypted plaintext does not match encrypted plaintext");
+
+    cjose_get_dealloc()(plain1);
+    cjose_jwe_release(jwe);
+
+    static const char *JWE_TAMPERED_AT =
+    		"eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0."
+			"6KB707dM9YTIgHtLvtgWQ8mKwboJW3of9locizkDTHzBC2IlrT1oOQ."
+			"AxY8DCtDaGlsbGljb3RoZQ."
+			"KDlTtXchhZTGufMYmOYGS4HffxPSUrfmqCHXaI9wOGY."
+			"U0m_YmjN04DJvceFICbCVq";
+
+    // import the JWE
+    jwe = cjose_jwe_import(JWE_TAMPERED_AT, strlen(JWE_TAMPERED_AT), &err);
+    ck_assert_msg(NULL != jwe, "cjose_jwe_import failed: "
+            "%s, file: %s, function: %s, line: %ld",
+            err.message, err.file, err.function, err.line);
+
+    // decrypt the imported JWE
+    size_t plain2_len = 0;
+    uint8_t *plain2 = cjose_jwe_decrypt(jwe, jwk, &plain2_len, &err);
+    ck_assert_msg(
+            NULL == plain2,
+            "cjose_jwe_get_plaintext succeeded for tampered authentication tag");
+
+    cjose_jwe_release(jwe);
+
+    static const char *JWE_TAMPERED_CIPHERTEXT =
+    		"eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0."
+			"6KB707dM9YTIgHtLvtgWQ8mKwboJW3of9locizkDTHzBC2IlrT1oOQ."
+			"AxY8DCtDaGlsbGljb3RoZQ."
+			"KDlTtXchhZTGufMYmOYGS4HffxPSUrfmqCHXaI9wOGy."
+			"U0m_YmjN04DJvceFICbCVQ";
+
+    // import the JWE
+    jwe = cjose_jwe_import(JWE_TAMPERED_CIPHERTEXT, strlen(JWE_TAMPERED_CIPHERTEXT), &err);
+    ck_assert_msg(NULL != jwe, "cjose_jwe_import failed: "
+            "%s, file: %s, function: %s, line: %ld",
+            err.message, err.file, err.function, err.line);
+
+    // decrypt the imported JWE
+    size_t plain3_len = 0;
+    uint8_t *plain3 = cjose_jwe_decrypt(jwe, jwk, &plain3_len, &err);
+    ck_assert_msg(
+            NULL == plain3,
+            "cjose_jwe_get_plaintext succeeded for tampered ciphertext");
+
+    cjose_jwe_release(jwe);
+
+    static const char *JWE_TAMPERED_IV =
+    		"eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0."
+			"6KB707dM9YTIgHtLvtgWQ8mKwboJW3of9locizkDTHzBC2IlrT1oOQ."
+			"AxY8DCtDaGlsbGljb3RoZq."
+			"KDlTtXchhZTGufMYmOYGS4HffxPSUrfmqCHXaI9wOGY."
+			"U0m_YmjN04DJvceFICbCVQ";
+
+    // import the JWE
+    jwe = cjose_jwe_import(JWE_TAMPERED_IV, strlen(JWE_TAMPERED_IV), &err);
+    ck_assert_msg(NULL != jwe, "cjose_jwe_import failed: "
+            "%s, file: %s, function: %s, line: %ld",
+            err.message, err.file, err.function, err.line);
+
+    // decrypt the imported JWE
+    size_t plain4_len = 0;
+    uint8_t *plain4 = cjose_jwe_decrypt(jwe, jwk, &plain4_len, &err);
+    ck_assert_msg(
+            NULL == plain4,
+            "cjose_jwe_get_plaintext succeeded for tampered IV");
+
+    cjose_jwe_release(jwe);
+
+    static const char *JWE_TAMPERED_CEK =
+    		"eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0."
+			"6KB707dM9YTIgHtLvtgWQ8mKwboJW3of9locizkDTHzBC2IlrT1oOq."
+			"AxY8DCtDaGlsbGljb3RoZQ."
+			"KDlTtXchhZTGufMYmOYGS4HffxPSUrfmqCHXaI9wOGY."
+			"U0m_YmjN04DJvceFICbCVQ";
+
+    // import the JWE
+    jwe = cjose_jwe_import(JWE_TAMPERED_CEK, strlen(JWE_TAMPERED_CEK), &err);
+    ck_assert_msg(NULL != jwe, "cjose_jwe_import failed: "
+            "%s, file: %s, function: %s, line: %ld",
+            err.message, err.file, err.function, err.line);
+
+    // decrypt the imported JWE
+    size_t plain5_len = 0;
+    uint8_t *plain5 = cjose_jwe_decrypt(jwe, jwk, &plain5_len, &err);
+    ck_assert_msg(
+            NULL == plain5,
+            "cjose_jwe_get_plaintext succeeded for tampered content encryption key");
+
+    cjose_jwe_release(jwe);
+
+    static const char *JWE_TAMPERED_HDR =
+     		"eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4Q0JDLUhTMjU2IiB9."
+			"6KB707dM9YTIgHtLvtgWQ8mKwboJW3of9locizkDTHzBC2IlrT1oOQ."
+			"AxY8DCtDaGlsbGljb3RoZQ."
+			"KDlTtXchhZTGufMYmOYGS4HffxPSUrfmqCHXaI9wOGY."
+			"U0m_YmjN04DJvceFICbCVQ";
+
+    // import the JWE
+    jwe = cjose_jwe_import(JWE_TAMPERED_HDR, strlen(JWE_TAMPERED_HDR), &err);
+    ck_assert_msg(NULL != jwe, "cjose_jwe_import failed: "
+            "%s, file: %s, function: %s, line: %ld",
+            err.message, err.file, err.function, err.line);
+
+    // decrypt the imported JWE
+    size_t plain6_len = 0;
+    uint8_t *plain6 = cjose_jwe_decrypt(jwe, jwk, &plain6_len, &err);
+    ck_assert_msg(
+            NULL == plain6,
+            "cjose_jwe_get_plaintext succeeded for tampered header");
+
+    cjose_jwe_release(jwe);
+    cjose_jwk_release(jwk);
+}
+END_TEST
+
+
 Suite *cjose_jwe_suite()
 {
     Suite *suite = suite_create("jwe");
@@ -567,6 +747,7 @@ Suite *cjose_jwe_suite()
     tcase_add_test(tc_jwe, test_cjose_jwe_self_encrypt_self_decrypt_empty);
     tcase_add_test(tc_jwe, test_cjose_jwe_self_encrypt_self_decrypt_large);
     tcase_add_test(tc_jwe, test_cjose_jwe_self_encrypt_self_decrypt_many);
+    tcase_add_test(tc_jwe, test_cjose_jwe_decrypt_aes);
     tcase_add_test(tc_jwe, test_cjose_jwe_encrypt_with_bad_header);
     tcase_add_test(tc_jwe, test_cjose_jwe_encrypt_with_bad_key);
     tcase_add_test(tc_jwe, test_cjose_jwe_encrypt_with_bad_content);

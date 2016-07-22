@@ -953,17 +953,6 @@ static bool _cjose_jws_verify_sig_ps(
 
 
 ////////////////////////////////////////////////////////////////////////////////
-int _const_memcmp(const uint8_t *a, const uint8_t *b, const size_t size) 
-{
-  unsigned char result = 0; 
-  for (size_t i = 0; i < size; i++) {
-    result |= a[i] ^ b[i];
-  }
-  return result;
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
 static bool _cjose_jws_verify_sig_rs(
             cjose_jws_t *jws, 
             const cjose_jwk_t *jwk, 
@@ -1031,7 +1020,7 @@ static bool _cjose_jws_verify_sig_hmac_sha(
     }
 
     // verify decrypted digest matches computed digest
-    if ((_const_memcmp(jws->dig, jws->sig, jws->dig_len) != 0) ||
+    if ((cjose_const_memcmp(jws->dig, jws->sig, jws->dig_len) != 0) ||
         (jws->sig_len != jws->dig_len))
     {
         CJOSE_ERROR(err, CJOSE_ERR_CRYPTO);

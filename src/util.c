@@ -48,3 +48,16 @@ cjose_dealloc_fn_t cjose_get_dealloc()
            free :
            _dealloc;
 }
+
+int cjose_const_memcmp(
+        const uint8_t *a,
+        const uint8_t *b,
+        const size_t size)
+{
+    unsigned char result = 0;
+    for (size_t i = 0; i < size; i++)
+    {
+        result |= a[i] ^ b[i];
+    }
+    return result;
+}
