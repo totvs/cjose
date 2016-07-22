@@ -171,6 +171,12 @@ static void _self_encrypt_self_decrypt(const char *plain1)
             plain1);
 
     _self_encrypt_self_decrypt_with_key(
+            CJOSE_HDR_ALG_RSA1_5,
+            CJOSE_HDR_ENC_A256GCM,
+            JWK_RSA,
+            plain1);
+
+    _self_encrypt_self_decrypt_with_key(
             CJOSE_HDR_ALG_DIR, 
             CJOSE_HDR_ENC_A256GCM, 
             JWK_OCT, 
@@ -458,7 +464,7 @@ START_TEST(test_cjose_jwe_import_export_compare)
     // re-export the jwe object
     const char *cser = cjose_jwe_export(jwe, &err);
     ck_assert_msg(NULL != cser,
-            "re-export of imported JWE faied: "
+            "re-export of imported JWE failed: "
             "%s, file: %s, function: %s, line: %ld", 
             err.message, err.file, err.function, err.line);
 
