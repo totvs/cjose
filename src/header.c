@@ -14,6 +14,7 @@
 
 const char *CJOSE_HDR_ALG = "alg";
 const char *CJOSE_HDR_ALG_RSA_OAEP = "RSA-OAEP";
+const char *CJOSE_HDR_ALG_RSA1_5 = "RSA1_5";
 const char *CJOSE_HDR_ALG_A128KW = "A128KW";
 const char *CJOSE_HDR_ALG_A192KW = "A192KW";
 const char *CJOSE_HDR_ALG_A256KW = "A256KW";

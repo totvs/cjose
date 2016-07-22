@@ -65,6 +65,16 @@ static bool _cjose_jwe_decrypt_ek_rsa_oaep(
         const cjose_jwk_t *jwk,
         cjose_err *err);
 
+static bool _cjose_jwe_encrypt_ek_rsa1_5(
+        cjose_jwe_t *jwe,
+        const cjose_jwk_t *jwk,
+        cjose_err *err);
+
+static bool _cjose_jwe_decrypt_ek_rsa1_5(
+        cjose_jwe_t *jwe,
+        const cjose_jwk_t *jwk,
+        cjose_err *err);
+
 static bool _cjose_jwe_set_iv_a256gcm(
         cjose_jwe_t *jwe,
         cjose_err *err);
@@ -184,6 +194,11 @@ static bool _cjose_jwe_validate_hdr(
     {
         jwe->fns.encrypt_ek = _cjose_jwe_encrypt_ek_rsa_oaep;
         jwe->fns.decrypt_ek = _cjose_jwe_decrypt_ek_rsa_oaep;
+    }
+    if (strcmp(alg, CJOSE_HDR_ALG_RSA1_5) == 0)
+    {
+        jwe->fns.encrypt_ek = _cjose_jwe_encrypt_ek_rsa1_5;
+        jwe->fns.decrypt_ek = _cjose_jwe_decrypt_ek_rsa1_5;
     }
     if (strcmp(alg, CJOSE_HDR_ALG_DIR) == 0)
     {
@@ -434,9 +449,10 @@ static bool _cjose_jwe_decrypt_ek_aes_kw(
 
 
 ////////////////////////////////////////////////////////////////////////////////
-static bool _cjose_jwe_encrypt_ek_rsa_oaep(
+static bool _cjose_jwe_encrypt_ek_rsa_padding(
         cjose_jwe_t *jwe, 
         const cjose_jwk_t *jwk,
+        int padding,
         cjose_err *err)
 {
     // jwk must be RSA and have the necessary public parts set
@@ -472,9 +488,9 @@ static bool _cjose_jwe_encrypt_ek_rsa_oaep(
         return false;        
     }
 
-    // encrypt the CEK using RSAES-OAEP
+    // encrypt the CEK using RSA v1.5 or OAEP padding
     if (RSA_public_encrypt(jwe->cek_len, jwe->cek, jwe->part[1].raw,
-            (RSA *)jwk->keydata, RSA_PKCS1_OAEP_PADDING) != 
+            (RSA *)jwk->keydata, padding) !=
             jwe->part[1].raw_len)
     {
         CJOSE_ERROR(err, CJOSE_ERR_CRYPTO);
@@ -486,9 +502,10 @@ static bool _cjose_jwe_encrypt_ek_rsa_oaep(
 
 
 ////////////////////////////////////////////////////////////////////////////////
-static bool _cjose_jwe_decrypt_ek_rsa_oaep(
+static bool _cjose_jwe_decrypt_ek_rsa_padding(
         cjose_jwe_t *jwe, 
         const cjose_jwk_t *jwk,
+        int padding,
         cjose_err *err)
 {
     if (NULL == jwe || NULL == jwk)
@@ -512,10 +529,10 @@ static bool _cjose_jwe_decrypt_ek_rsa_oaep(
         return false;
     }
 
-    // decrypt the CEK using RSAES-OAEP
+    // decrypt the CEK using RSA v1.5 or OAEP padding
     jwe->cek_len = RSA_private_decrypt(
             jwe->part[1].raw_len, jwe->part[1].raw, jwe->cek, 
-            (RSA *)jwk->keydata, RSA_PKCS1_OAEP_PADDING);
+            (RSA *)jwk->keydata, padding);
     if (-1 == jwe->cek_len)
     {
         CJOSE_ERROR(err, CJOSE_ERR_CRYPTO);
@@ -523,6 +540,46 @@ static bool _cjose_jwe_decrypt_ek_rsa_oaep(
     }
 
     return true;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+static bool _cjose_jwe_encrypt_ek_rsa_oaep(
+        cjose_jwe_t *jwe,
+        const cjose_jwk_t *jwk,
+        cjose_err *err)
+{
+    return _cjose_jwe_encrypt_ek_rsa_padding(jwe, jwk, RSA_PKCS1_OAEP_PADDING ,err);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+static bool _cjose_jwe_decrypt_ek_rsa_oaep(
+        cjose_jwe_t *jwe,
+        const cjose_jwk_t *jwk,
+        cjose_err *err)
+{
+    return _cjose_jwe_decrypt_ek_rsa_padding(jwe, jwk, RSA_PKCS1_OAEP_PADDING ,err);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+static bool _cjose_jwe_encrypt_ek_rsa1_5(
+        cjose_jwe_t *jwe,
+        const cjose_jwk_t *jwk,
+        cjose_err *err)
+{
+    return _cjose_jwe_encrypt_ek_rsa_padding(jwe, jwk, RSA_PKCS1_PADDING ,err);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+static bool _cjose_jwe_decrypt_ek_rsa1_5(
+        cjose_jwe_t *jwe,
+        const cjose_jwk_t *jwk,
+        cjose_err *err)
+{
+    return _cjose_jwe_decrypt_ek_rsa_padding(jwe, jwk, RSA_PKCS1_PADDING ,err);
 }
 
 

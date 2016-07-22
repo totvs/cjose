@@ -40,6 +40,9 @@ extern const char *CJOSE_HDR_KID;
 /** The JWE algorithm attribute value for RSA-OAEP. */
 extern const char *CJOSE_HDR_ALG_RSA_OAEP;
 
+/** The JWE algorithm attribute value for RSA1_5. */
+extern const char *CJOSE_HDR_ALG_RSA1_5;
+
 /** The JWE algorithm attribute value for A128KW, A192KW and A256KW. */
 extern const char *CJOSE_HDR_ALG_A128KW;
 extern const char *CJOSE_HDR_ALG_A192KW;
