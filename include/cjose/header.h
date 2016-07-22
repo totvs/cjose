@@ -37,6 +37,9 @@ extern const char *CJOSE_HDR_CTY;
 /** The Jose "kid" header attribute. */
 extern const char *CJOSE_HDR_KID;
 
+/** The JWA algorithm attribute value for none. */
+extern const char *CJOSE_HDR_ALG_NONE;
+
 /** The JWE algorithm attribute value for RSA-OAEP. */
 extern const char *CJOSE_HDR_ALG_RSA_OAEP;
 
