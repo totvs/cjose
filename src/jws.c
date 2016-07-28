@@ -859,9 +859,20 @@ cjose_jws_t *cjose_jws_import(
     // validate the JSON header segment
     if (!_cjose_jws_validate_hdr(jws, err))
     {
-        CJOSE_ERROR(err, CJOSE_ERR_INVALID_ARG);
-        cjose_jws_release(jws);
-        return NULL;        
+        // make an exception for alg=none so that it will import/parse but not sign/verify
+        json_t *alg_obj = json_object_get(jws->hdr, CJOSE_HDR_ALG);
+        if (NULL == alg_obj)
+        {
+            CJOSE_ERROR(err, CJOSE_ERR_INVALID_ARG);
+            return NULL;
+        }
+        const char *alg = json_string_value(alg_obj);
+        if ((!alg) || (strcmp(alg, CJOSE_HDR_ALG_NONE) != 0))
+        {
+            CJOSE_ERROR(err, CJOSE_ERR_INVALID_ARG);
+            cjose_jws_release(jws);
+            return NULL;
+        }
     }
 
     // copy and b64u decode data segment
