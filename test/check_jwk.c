@@ -496,6 +496,7 @@ START_TEST(test_cjose_jwk_to_json_ec)
             ",\"y\":\"KbkZ7r_DQ-t67pnxPnFDHObTLBqn44BSjcqn0STUkaM\"}",
             json
     );
+    free(json);
 
     json = cjose_jwk_to_json(jwk, true, &err);
     ck_assert(NULL != json);
@@ -505,6 +506,7 @@ START_TEST(test_cjose_jwk_to_json_ec)
             ",\"y\":\"KbkZ7r_DQ-t67pnxPnFDHObTLBqn44BSjcqn0STUkaM\""
             ",\"d\":\"RSSjcBQW_EBxm1gzYhejCdWtj3Id_GuwldwEgSuKCEM\"}",
             json);
+    free(json);
 
     cjose_jwk_release(jwk);
 }
@@ -543,8 +545,7 @@ START_TEST(test_cjose_jwk_to_json_rsa)
     const char *json;
     json = cjose_jwk_to_json(jwk, false, &err);
     ck_assert(NULL != json);
-    ck_assert_str_eq(RSA_PUBLIC_JSON, json
-    );
+    ck_assert_str_eq(RSA_PUBLIC_JSON, json);
     free(json);
 
     json = cjose_jwk_to_json(jwk, true, &err);
@@ -679,7 +680,7 @@ START_TEST(test_cjose_jwk_import_valid)
         // get json representation of "after" 
         const char *jwk_str = cjose_jwk_to_json(jwk, true, &err);
         json_t *right_json = json_loads(jwk_str, 0, NULL);
-        ck_assert(NULL != right_json);        
+        ck_assert(NULL != right_json);
 
         // check that cooresponding attributes match up
         const char *attrs[] = { "kty", "crv", "x", "y", "d", "kid", 
@@ -689,6 +690,7 @@ START_TEST(test_cjose_jwk_import_valid)
             ck_assert_str_eq(JWK[i], jwk_str);
         }
 
+        free(jwk_str);
         json_decref(left_json);
         json_decref(right_json);
         cjose_jwk_release(jwk);
@@ -955,6 +957,7 @@ START_TEST(test_cjose_jwk_EC_import_with_priv_export_with_pub)
         ck_assert_str_eq(JWK_OUT, jwk_str);
     }
 
+    free(jwk_str);
     json_decref(left_json);
     json_decref(right_json);
     cjose_jwk_release(jwk);

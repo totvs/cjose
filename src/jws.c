@@ -565,6 +565,8 @@ static bool _cjose_jws_build_sig_ec(
         const cjose_jwk_t *jwk,
         cjose_err *err)
 {
+    bool retval = false;
+
     // ensure jwk is EC
     if (jwk->kty != CJOSE_JWK_KTY_EC)
     {
@@ -579,7 +581,7 @@ static bool _cjose_jws_build_sig_ec(
     if (NULL == ecdsa_sig)
     {
         CJOSE_ERROR(err, CJOSE_ERR_CRYPTO);
-        return false;
+        goto _cjose_jws_build_sig_ec_cleanup;
     }
 
     // allocate buffer for signature
@@ -599,7 +601,7 @@ static bool _cjose_jws_build_sig_ec(
     if (NULL == jws->sig)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
-        return false;
+        goto _cjose_jws_build_sig_ec_cleanup;
     }
 
     memset(jws->sig, 0, jws->sig_len);
@@ -613,10 +615,16 @@ static bool _cjose_jws_build_sig_ec(
             &jws->sig_b64u, &jws->sig_b64u_len, err))
     {
         CJOSE_ERROR(err, CJOSE_ERR_CRYPTO);
-        return false;
+        goto _cjose_jws_build_sig_ec_cleanup;
     }
 
-    return true;
+    retval = true;
+
+    _cjose_jws_build_sig_ec_cleanup:
+    if (ecdsa_sig)
+        ECDSA_SIG_free(ecdsa_sig);
+
+    return retval;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
