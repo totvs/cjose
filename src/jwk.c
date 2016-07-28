@@ -323,7 +323,7 @@ static bool _oct_private_fields(
         return false;
     }
 
-    field = json_stringn(k, klen);
+    field = _cjose_json_stringn(k, klen);
     cjose_get_dealloc()(k);
     k = NULL;
     if (!field)
@@ -627,7 +627,7 @@ static bool _EC_public_fields(
     {
         goto _ec_to_string_cleanup;
     }
-    field = json_stringn(b64u, len);
+    field = _cjose_json_stringn(b64u, len);
     if (!field)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
@@ -647,7 +647,7 @@ static bool _EC_public_fields(
     {
         goto _ec_to_string_cleanup;
     }
-    field = json_stringn(b64u, len);
+    field = _cjose_json_stringn(b64u, len);
     if (!field)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
@@ -721,7 +721,7 @@ static bool _EC_private_fields(
     {
         goto _ec_to_string_cleanup;
     }
-    field = json_stringn(b64u, len);
+    field = _cjose_json_stringn(b64u, len);
     if (!field)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
@@ -1007,7 +1007,7 @@ static inline bool _RSA_json_field(
     {
         goto RSA_json_field_cleanup;
     }
-    field = json_stringn(b64u, b64ulen);
+    field = _cjose_json_stringn(b64u, b64ulen);
     if (!field)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
