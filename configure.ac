@@ -7,7 +7,7 @@ AC_INIT([cjose], [0.3.0])
 AM_INIT_AUTOMAKE([foreign])
 LT_PREREQ([2.2])
 LT_INIT([dlopen])
-AC_CONFIG_MACRO_DIR(./[m4])
+AC_CONFIG_MACRO_DIR([m4])
 
 ### Basic program checks
 AC_PROG_CC
