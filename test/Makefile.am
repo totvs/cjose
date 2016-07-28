@@ -16,6 +16,7 @@ check_cjose_SOURCES = check_cjose.c \
                       check_jwk.c \
                       check_jwe.c \
                       check_jws.c \
-                      check_header.c 
+                      check_header.c \
+                      check_cjose.h 
 
 endif

@@ -104,7 +104,7 @@ CONFIG_CLEAN_VPATH_FILES =
 @HAVE_CHECK_TRUE@am__EXEEXT_1 = check_cjose$(EXEEXT)
 am__check_cjose_SOURCES_DIST = check_cjose.c check_version.c \
 	check_util.c check_base64.c check_jwk.c check_jwe.c \
-	check_jws.c check_header.c
+	check_jws.c check_header.c check_cjose.h
 @HAVE_CHECK_TRUE@am_check_cjose_OBJECTS =  \
 @HAVE_CHECK_TRUE@	check_cjose-check_cjose.$(OBJEXT) \
 @HAVE_CHECK_TRUE@	check_cjose-check_version.$(OBJEXT) \
@@ -548,7 +548,8 @@ top_srcdir = @top_srcdir@
 @HAVE_CHECK_TRUE@                      check_jwk.c \
 @HAVE_CHECK_TRUE@                      check_jwe.c \
 @HAVE_CHECK_TRUE@                      check_jws.c \
-@HAVE_CHECK_TRUE@                      check_header.c 
+@HAVE_CHECK_TRUE@                      check_header.c \
+@HAVE_CHECK_TRUE@                      check_cjose.h 
 
 all: all-am
 
