@@ -941,7 +941,7 @@ Suite *cjose_jws_suite()
     Suite *suite = suite_create("jws");
 
     TCase *tc_jws = tcase_create("core");
-    tcase_set_timeout(tc_jws, 15.0);
+    tcase_set_timeout(tc_jws, 60.0);
     tcase_add_test(tc_jws, test_cjose_jws_self_sign_self_verify);
     tcase_add_test(tc_jws, test_cjose_jws_self_sign_self_verify_short);
     tcase_add_test(tc_jws, test_cjose_jws_self_sign_self_verify_empty);

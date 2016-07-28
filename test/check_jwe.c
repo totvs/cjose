@@ -892,6 +892,7 @@ Suite *cjose_jwe_suite()
     Suite *suite = suite_create("jwe");
 
     TCase *tc_jwe = tcase_create("core");
+    tcase_set_timeout(tc_jwe, 60.0);
     tcase_add_test(tc_jwe, test_cjose_jwe_node_jose_encrypt_self_decrypt);
     tcase_add_test(tc_jwe, test_cjose_jwe_self_encrypt_self_decrypt);
     tcase_add_test(tc_jwe, test_cjose_jwe_self_encrypt_self_decrypt_short);
