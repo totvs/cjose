@@ -91,13 +91,28 @@ char *_cjose_strndup(const char *str, ssize_t len, cjose_err *err)
     return result;
 }
 
-json_t *_cjose_json_stringn(const char *value, size_t len) {
+json_t *_cjose_json_stringn(const char *value, size_t len, cjose_err *err) {
+	json_t *result = NULL;
 #if JANSSON_VERSION_HEX <= 0x020600
-    char *s = strndup(value, len);
-    json_t *r = json_string(s);
-    free(s);
-    return r;
+    char *s = _cjose_strndup(value, len, err);
+    if (!s)
+    {
+    	return NULL;
+    }
+    result = json_string(s);
+    if (!result)
+    {
+        CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
+        return NULL;
+    }
+    cjose_get_dealloc()(s);
 #else
-    return json_stringn(value, len);
+    result = json_stringn(value, len);
+    if (!result)
+    {
+        CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
+        return NULL;
+    }
 #endif
+    return result;
 }

@@ -10,8 +10,10 @@
 
 #include <cjose/error.h>
 
+#include <jansson.h>
 #include <string.h>
 
 char *_cjose_strndup(const char *str, ssize_t len, cjose_err *err);
+json_t *_cjose_json_stringn(const char *value, size_t len, cjose_err *err);
 
 #endif // SRC_UTIL_INT_H
