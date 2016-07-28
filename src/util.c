@@ -10,6 +10,7 @@
 #include <jansson.h>
 #include <openssl/crypto.h>
 #include <stdlib.h>
+#include <string.h>
 
 static cjose_alloc_fn_t _alloc;
 static cjose_realloc_fn_t _realloc;
@@ -60,4 +61,15 @@ int cjose_const_memcmp(
         result |= a[i] ^ b[i];
     }
     return result;
+}
+
+json_t *_cjose_json_stringn(const char *value, size_t len) {
+#if JANSSON_VERSION_HEX <= 0x020600
+    char *s = strndup(value, len);
+    json_t *r = json_string(s);
+    free(s);
+    return r;
+#else
+    return json_stringn(value, len);
+#endif
 }
