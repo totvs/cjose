@@ -69,6 +69,4 @@ bool cjose_jwk_hkdf(
         unsigned int okm_len,
         cjose_err *err);
 
-json_t *_cjose_json_stringn(const char *value, size_t len);
-
 #endif // SRC_JWK_INT_H

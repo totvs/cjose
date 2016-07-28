@@ -323,7 +323,7 @@ static bool _oct_private_fields(
         return false;
     }
 
-    field = _cjose_json_stringn(k, klen);
+    field = _cjose_json_stringn(k, klen, err);
     cjose_get_dealloc()(k);
     k = NULL;
     if (!field)
@@ -627,10 +627,9 @@ static bool _EC_public_fields(
     {
         goto _ec_to_string_cleanup;
     }
-    field = _cjose_json_stringn(b64u, len);
+    field = _cjose_json_stringn(b64u, len, err);
     if (!field)
     {
-        CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
         goto _ec_to_string_cleanup;
     }
     json_object_set(json, "x", field);
@@ -647,10 +646,9 @@ static bool _EC_public_fields(
     {
         goto _ec_to_string_cleanup;
     }
-    field = _cjose_json_stringn(b64u, len);
+    field = _cjose_json_stringn(b64u, len, err);
     if (!field)
     {
-        CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
         goto _ec_to_string_cleanup;
     }
     json_object_set(json, "y", field);
@@ -721,10 +719,9 @@ static bool _EC_private_fields(
     {
         goto _ec_to_string_cleanup;
     }
-    field = _cjose_json_stringn(b64u, len);
+    field = _cjose_json_stringn(b64u, len, err);
     if (!field)
     {
-        CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
         goto _ec_to_string_cleanup;
     }
     json_object_set(json, "d", field);
@@ -1007,10 +1004,9 @@ static inline bool _RSA_json_field(
     {
         goto RSA_json_field_cleanup;
     }
-    field = _cjose_json_stringn(b64u, b64ulen);
+    field = _cjose_json_stringn(b64u, b64ulen, err);
     if (!field)
     {
-        CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
         goto RSA_json_field_cleanup;
     }
     json_object_set(json, name, field);
