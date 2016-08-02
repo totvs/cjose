@@ -1,19 +1,47 @@
-<a name=""></a>
-# [0.3.0](https://github.com/linuxwolf/cjose/compare/0.2.0...0.3.0) (2016-05-26)
+# Release Notes #
+
+<a name="0.4.0"></a>
+## [0.4.0](https://github.com/linuxwolf/cjose/compare/0.3.0...0.4.0) (2016-08-02)
+
+### Update
+
+* Support OpenSSL 1.1.x ([9bc8a801a5160952787d4ed2fdc225eb57d471a5](https://github.com/cisco/cjose/commit/9bc8a801a5160952787d4ed2fdc225eb57d471a5))
+* Support AES KeyWrap and AES-CBC-HMAC-SHA2 ([b7518799842e1b411d7b900ef8879f51c65584ee](https://github.com/cisco/cjose/commit/b7518799842e1b411d7b900ef8879f51c65584ee))
+* Support Elliptic Curve JWS Algorithms (ES256 / ES384 / ES512) ([8206eebb1c69521a90601a3f37f8f1693fb4ec4f](https://github.com/cisco/cjose/commit/8206eebb1c69521a90601a3f37f8f1693fb4ec4f))
+* Support RSAES-PKCS1-v1_5 key encryption ([76ae28a299cf207d4373cfd95cd299b6af0cc248](https://github.com/cisco/cjose/commit/76ae28a299cf207d4373cfd95cd299b6af0cc248))
+* Support symmetric HMAC "signatures" ([f43f17dd0ff6b513d02db075c728f08031051e43](https://github.com/cisco/cjose/commit/f43f17dd0ff6b513d02db075c728f08031051e43))
+* Support unsecured JWS (**IMPORT ONLY**) ([8512cf3a45bea90bbbba2d55c083d3f08ccd25f6](https://github.com/cisco/cjose/commit/8512cf3a45bea90bbbba2d55c083d3f08ccd25f6))
+* Support older versions of Jansson ([d9d3d43df91264a59e94eaefd0f7068e2249cbde](https://github.com/cisco/cjose/commit/d9d3d43df91264a59e94eaefd0f7068e2249cbde))
+
+### Fix
+
+* RS256 verify always returned true ([c177b707a4877406bf93f35171bdc8d7f0b74d33](https://github.com/cisco/cjose/commit/c177b707a4877406bf93f35171bdc8d7f0b74d33))
+* Replace free() with dealloc() ([8361f3827622232b1d8fa944b4bc3a3938bb9fd6](https://github.com/cisco/cjose/commit/8361f3827622232b1d8fa944b4bc3a3938bb9fd6))
+* Remove the use of strdup ([e968f21e6d1ae4bf499e0dd4e8fd628efcada607](https://github.com/cisco/cjose/commit/e968f21e6d1ae4bf499e0dd4e8fd628efcada607))
+
+
+### Build
+
+* Use CJOSE_VERSION everywhere ([2c58aa1de96f883c23626b05527754c0c7590079](https://github.com/cisco/cjose/commit/2c58aa1de96f883c23626b05527754c0c7590079))
+* Use cjose_err.code instead of errno ([5f40fef38725d375f204a16a79beae754d58fc76](https://github.com/cisco/cjose/commit/5f40fef38725d375f204a16a79beae754d58fc76))
+
+
+<a name="0.3.0"></a>
+## [0.3.0](https://github.com/linuxwolf/cjose/compare/0.2.0...0.3.0) (2016-05-26)
 
 
 ### Update
 
-* expose more key information ([16cf34901bbff6791c20aa831c34660e510cc9ee](https://github.com/linuxwolf/cjose/commit/16cf34901bbff6791c20aa831c34660e510cc9ee))
+* expose more key information ([16cf34901bbff6791c20aa831c34660e510cc9ee](https://github.com/cisco/cjose/commit/16cf34901bbff6791c20aa831c34660e510cc9ee))
 
 ### Fix
 
-* missing 'util.h' in superheader ([02593fb83991651570ec50dd35d89fb4e747ec71](https://github.com/linuxwolf/cjose/commit/02593fb83991651570ec50dd35d89fb4e747ec71))
+* missing 'util.h' in superheader ([02593fb83991651570ec50dd35d89fb4e747ec71](https://github.com/cisco/cjose/commit/02593fb83991651570ec50dd35d89fb4e747ec71))
 
 
 
-<a name=""></a>
-# [0.2.0](https://github.com/cisco/cjose/compare/0.1.2...0.2.0) (2016-05-06)
+<a name="0.2.0"></a>
+## [0.2.0](https://github.com/cisco/cjose/compare/0.1.2...0.2.0) (2016-05-06)
 
 
 ### Update
@@ -31,6 +59,6 @@
 
 
 <a name="0.1.2"></a>
-# 0.1.2 (2016-03-15)
+## 0.1.2 (2016-03-15)
 
 Initial public release
