@@ -20,7 +20,7 @@ Implementation of JOSE for C/C++
 ### Libraries ###
 
 * OpenSSL >= 1.0.1h (or its API equivalent)
-* Jansson >= 2.6
+* Jansson >= 2.3
 
 ## Getting Started ##
 
