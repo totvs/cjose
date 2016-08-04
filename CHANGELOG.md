@@ -1,7 +1,15 @@
 # Release Notes #
 
+<a name="0.4.1"></a>
+## [0.4.1](https://github.com/cisco/cjose/0.4.0..0.4.1) (2016-08-04)
+
+### Build
+
+* Compiler warning/error fixes for multiple platforms ([011612e72698dd02249f578fb4ec0145c624c0e0](https://github.com/cisco/cjose/commit/011612e72698dd02249f578fb4ec0145c624c0e0))
+
+
 <a name="0.4.0"></a>
-## [0.4.0](https://github.com/linuxwolf/cjose/compare/0.3.0...0.4.0) (2016-08-02)
+## [0.4.0](https://github.com/cisco/cjose/compare/0.3.0...0.4.0) (2016-08-02)
 
 ### Update
 
