@@ -458,7 +458,7 @@ START_TEST(test_cjose_jwe_import_export_compare)
             err.message, err.file, err.function, err.line);
 
     // re-export the jwe object
-    const char *cser = cjose_jwe_export(jwe, &err);
+    char *cser = cjose_jwe_export(jwe, &err);
     ck_assert_msg(NULL != cser,
             "re-export of imported JWE failed: "
             "%s, file: %s, function: %s, line: %ld", 

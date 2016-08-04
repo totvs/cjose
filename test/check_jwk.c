@@ -447,7 +447,7 @@ START_TEST(test_cjose_jwk_to_json_oct)
     jwk = cjose_jwk_create_oct_spec(k, klen, &err);
     cjose_get_dealloc()(k);
 
-    const char *json;
+    char *json;
     json = cjose_jwk_to_json(jwk, false, &err);
     ck_assert(NULL != json);
     ck_assert_str_eq("{\"kty\":\"oct\"}", json);
@@ -478,7 +478,7 @@ START_TEST(test_cjose_jwk_to_json_ec)
     cjose_get_dealloc()(spec.x);
     cjose_get_dealloc()(spec.y);
 
-    const char *json;
+    char *json;
     json = cjose_jwk_to_json(jwk, false, &err);
     ck_assert(NULL != json);
     ck_assert_str_eq(
@@ -533,7 +533,7 @@ START_TEST(test_cjose_jwk_to_json_rsa)
     cjose_get_dealloc()(spec.dq);
     cjose_get_dealloc()(spec.qi);
 
-    const char *json;
+    char *json;
     json = cjose_jwk_to_json(jwk, false, &err);
     ck_assert(NULL != json);
     ck_assert_str_eq(RSA_PUBLIC_JSON, json);
@@ -673,7 +673,7 @@ START_TEST(test_cjose_jwk_import_valid)
         ck_assert(NULL != left_json);
 
         // get json representation of "after" 
-        const char *jwk_str = cjose_jwk_to_json(jwk, true, &err);
+        char *jwk_str = cjose_jwk_to_json(jwk, true, &err);
         json_t *right_json = json_loads(jwk_str, 0, NULL);
         ck_assert(NULL != right_json);
 
@@ -852,7 +852,7 @@ START_TEST(test_cjose_jwk_import_no_zero_termination)
     ck_assert(NULL != left_json);
 
     // get json representation of "after" 
-    const char *jwk_str = cjose_jwk_to_json(jwk, true, &err);
+    char *jwk_str = cjose_jwk_to_json(jwk, true, &err);
     json_t *right_json = json_loads(jwk_str, 0, NULL);
     ck_assert(NULL != right_json);
 
@@ -896,7 +896,7 @@ START_TEST(test_cjose_jwk_import_with_base64url_padding)
     ck_assert(NULL != left_json);
 
     // get json representation of "actual" (i.e. reserialized original)
-    const char *jwk_str = cjose_jwk_to_json(jwk, true, &err);
+    char *jwk_str = cjose_jwk_to_json(jwk, true, &err);
     json_t *right_json = json_loads(jwk_str, 0, NULL);
     ck_assert(NULL != right_json);        
 
@@ -941,7 +941,7 @@ START_TEST(test_cjose_jwk_EC_import_with_priv_export_with_pub)
     ck_assert(NULL != left_json);
 
     // get json representation of "actual" (i.e. reserialized original)
-    const char *jwk_str = cjose_jwk_to_json(jwk, true, &err);
+    char *jwk_str = cjose_jwk_to_json(jwk, true, &err);
     json_t *right_json = json_loads(jwk_str, 0, NULL);
     ck_assert(NULL != right_json);        
 
@@ -1058,7 +1058,7 @@ START_TEST(test_cjose_jwk_get_and_set_kid)
     ck_assert(sizeof(JWK_BEFORE) == sizeof(JWK_AFTER));
 
     const char *kid = NULL;
-    const char *json = NULL;
+    char *json = NULL;
     for (int i = 0; JWK_BEFORE[i] != NULL; ++i)
     {
         // import the before state

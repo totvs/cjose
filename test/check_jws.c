@@ -82,7 +82,7 @@ static void _self_sign_self_verify(
     ck_assert(hdr == cjose_jws_get_protected(jws1));
 
     // get the compact serialization of JWS
-    char *compact = NULL;
+    const char *compact = NULL;
     ck_assert_msg(
             cjose_jws_export(jws1, &compact, err),
             "cjose_jws_export failed: "
