@@ -143,8 +143,8 @@ static void _self_encrypt_self_decrypt_with_key(
 
     // confirm plain2 == plain1
     ck_assert(json_equal(
-        cjose_jwe_get_protected(jwe1),
-        cjose_jwe_get_protected(jwe2)));
+        (json_t *)cjose_jwe_get_protected(jwe1),
+        (json_t *)cjose_jwe_get_protected(jwe2)));
     ck_assert_msg(
             plain2_len == strlen(plain1),
             "length of decrypted plaintext does not match length of original, "

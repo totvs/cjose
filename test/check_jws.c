@@ -111,8 +111,8 @@ static void _self_sign_self_verify(
 
     // confirm equal headers
     ck_assert(json_equal(
-        cjose_jws_get_protected(jws1),
-        cjose_jws_get_protected(jws2)));
+        (json_t *)cjose_jws_get_protected(jws1),
+        (json_t *)cjose_jws_get_protected(jws2)));
 
     // confirm plain2 == plain1
     ck_assert_msg(
@@ -929,7 +929,7 @@ START_TEST(test_cjose_jws_none)
             err.message, err.file, err.function, err.line);
 
     // try to sign the unsecured JWS
-    ck_assert_msg(!cjose_jws_sign(jwk, jws->hdr, PLAINTEXT, strlen(PLAINTEXT), &err),
+    ck_assert_msg(!cjose_jws_sign(jwk, (cjose_header_t *)jws->hdr, PLAINTEXT, strlen(PLAINTEXT), &err),
             "cjose_jws_sign succeeded for unsecured JWT");
 
     cjose_jws_release(jws);
