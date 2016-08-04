@@ -140,11 +140,11 @@ static bool _cjose_jwe_build_hdr(
         cjose_err *err)
 {
     // save header object as part of the JWE (and incr. refcount)
-    jwe->hdr = header;
+    jwe->hdr = (json_t *)header;
     json_incref(jwe->hdr);
 
     // serialize the header
-    char *hdr_str = json_dumps(header, JSON_ENCODE_ANY | JSON_PRESERVE_ORDER);
+    char *hdr_str = json_dumps(jwe->hdr, JSON_ENCODE_ANY | JSON_PRESERVE_ORDER);
     if (NULL == hdr_str)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
@@ -175,7 +175,7 @@ static bool _cjose_jwe_validate_hdr(
         cjose_err *err)
 {
     // make sure we have an alg header
-    json_t *alg_obj = json_object_get(header, CJOSE_HDR_ALG);
+    json_t *alg_obj = json_object_get((json_t *)header, CJOSE_HDR_ALG);
     if (NULL == alg_obj)
     {
         CJOSE_ERROR(err, CJOSE_ERR_INVALID_ARG);
@@ -184,7 +184,7 @@ static bool _cjose_jwe_validate_hdr(
     const char *alg = json_string_value(alg_obj);
 
     // make sure we have an enc header
-    json_t *enc_obj = json_object_get(header, CJOSE_HDR_ENC);
+    json_t *enc_obj = json_object_get((json_t *)header, CJOSE_HDR_ENC);
     if (NULL == enc_obj)
     {
         CJOSE_ERROR(err, CJOSE_ERR_INVALID_ARG);
@@ -1381,7 +1381,7 @@ cjose_jwe_t *cjose_jwe_import(
     }
 
     // validate the JSON header
-    if (!_cjose_jwe_validate_hdr(jwe, jwe->hdr, err))
+    if (!_cjose_jwe_validate_hdr(jwe, (cjose_header_t *)jwe->hdr, err))
     {
         CJOSE_ERROR(err, CJOSE_ERR_INVALID_ARG);
         cjose_jwe_release(jwe);
@@ -1433,5 +1433,5 @@ cjose_header_t *cjose_jwe_get_protected(cjose_jwe_t *jwe)
     {
         return NULL;
     }
-    return jwe->hdr;
+    return (cjose_header_t *)jwe->hdr;
 }
