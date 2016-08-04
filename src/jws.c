@@ -82,7 +82,7 @@ static bool _cjose_jws_build_hdr(
         cjose_err *err)
 {
     // save header object as part of the JWS (and incr. refcount)
-    jws->hdr = header;
+    jws->hdr = (json_t *)header;
     json_incref(jws->hdr);
 
     // base64url encode the header
@@ -1202,5 +1202,5 @@ cjose_header_t *cjose_jws_get_protected(
         return NULL;
     }
 
-    return jws->hdr;
+    return (cjose_header_t *)jws->hdr;
 }

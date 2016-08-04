@@ -143,8 +143,8 @@ static void _self_encrypt_self_decrypt_with_key(
 
     // confirm plain2 == plain1
     ck_assert(json_equal(
-        cjose_jwe_get_protected(jwe1),
-        cjose_jwe_get_protected(jwe2)));
+        (json_t *)cjose_jwe_get_protected(jwe1),
+        (json_t *)cjose_jwe_get_protected(jwe2)));
     ck_assert_msg(
             plain2_len == strlen(plain1),
             "length of decrypted plaintext does not match length of original, "
@@ -458,7 +458,7 @@ START_TEST(test_cjose_jwe_import_export_compare)
             err.message, err.file, err.function, err.line);
 
     // re-export the jwe object
-    const char *cser = cjose_jwe_export(jwe, &err);
+    char *cser = cjose_jwe_export(jwe, &err);
     ck_assert_msg(NULL != cser,
             "re-export of imported JWE failed: "
             "%s, file: %s, function: %s, line: %ld", 

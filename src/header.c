@@ -47,7 +47,7 @@ const char *CJOSE_HDR_KID = "kid";
 cjose_header_t *cjose_header_new(
         cjose_err *err)
 {
-    cjose_header_t *retval = json_object();
+    cjose_header_t *retval = (cjose_header_t *)json_object();
     if (NULL == retval)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
@@ -61,7 +61,7 @@ cjose_header_t *cjose_header_retain(
 {
     if (NULL != header)
     {
-        header = json_incref(header);
+        header = (cjose_header_t *)json_incref((json_t *)header);
     }
     return header;
 }
@@ -72,7 +72,7 @@ void cjose_header_release(
 {
     if (NULL != header)
     {
-        json_decref(header);
+        json_decref((json_t *)header);
     }
 }
 
@@ -98,7 +98,7 @@ bool cjose_header_set(
     }
 
     json_object_set(
-            header, attr, value_obj);
+            (json_t *)header, attr, value_obj);
 
     json_decref(value_obj);
 
@@ -118,7 +118,7 @@ const char *cjose_header_get(
         return NULL;
     }
 
-    json_t *value_obj = json_object_get(header, attr);
+    json_t *value_obj = json_object_get((json_t *)header, attr);
     if (NULL == value_obj)
     {
         return NULL;
