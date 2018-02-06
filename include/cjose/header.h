@@ -35,8 +35,18 @@ extern const char *CJOSE_HDR_CTY;
 /** The Jose "kid" header attribute. */
 extern const char *CJOSE_HDR_KID;
 
+/** The Jose "epk" header attribte. */
+extern const char *CJOSE_HDR_EPK;
+
+/** For ECDH-ES algorithms, the PartyU and PartyV values */
+extern const char *CJOSE_HDR_APU;
+extern const char *CJOSE_HDR_APV;
+
 /** The JWA algorithm attribute value for none. */
 extern const char *CJOSE_HDR_ALG_NONE;
+
+/** The JWE algorithm attribute value of ECDH-ES. */
+extern const char *CJOSE_HDR_ALG_ECDH_ES;
 
 /** The JWE algorithm attribute value for RSA-OAEP. */
 extern const char *CJOSE_HDR_ALG_RSA_OAEP;
@@ -153,24 +163,17 @@ const char *cjose_header_get(cjose_header_t *header, const char *attr, cjose_err
  * \param attr[in] the header attribute to be set.
  * \param value[in] the JSON value to assign to the header attribute. The value must
  * be a valid JSON, and will be assigned as is.
- * \param err [out] An optional error object which can be used to get additional
- *        information in the event of an error.
- * \returns true if header is successfully set.
  */
 bool cjose_header_set_raw(cjose_header_t *header, const char *attr, const char *value, cjose_err *err);
 
 /**
  * Retrieves the raw value of the requested header attribute from the header
  * object.
- *
  * \param header[in] a header object.
  * \param attr[in] the header attribute to be got.
  * \param err [out] An optional error object which can be used to get additional
  *        information in the event of an error.
  * \returns a string containing the current JSON value for the requested attribute.
- * The value returned is a null terminated UTF-8 encoded JSON string, or NULL if corresponding
- * header was not found. The returned value is allocated when this function is called, and must
- * be freed by the caller.
  */
 char *cjose_header_get_raw(cjose_header_t *header, const char *attr, cjose_err *err);
 

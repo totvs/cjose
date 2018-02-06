@@ -19,6 +19,7 @@
 #include <stddef.h>
 #include <openssl/obj_mac.h>
 #include "cjose/error.h"
+#include "cjose/header.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -217,7 +218,9 @@ typedef enum {
     /** NIST P-384 Prime Curve (secp384r1) */
     CJOSE_JWK_EC_P_384 = NID_secp384r1,
     /** NIST P-521 Prime Curve (secp521r1) */
-    CJOSE_JWK_EC_P_521 = NID_secp521r1
+    CJOSE_JWK_EC_P_521 = NID_secp521r1,
+    /** Invalid Curve */
+    CJOSE_JWK_EC_INVALID = -1
 } cjose_jwk_ec_curve;
 
 /** Key specification for Elliptic Curve JWK objects. */
@@ -270,6 +273,16 @@ cjose_jwk_t *cjose_jwk_create_EC_random(cjose_jwk_ec_curve crv, cjose_err *err);
 cjose_jwk_t *cjose_jwk_create_EC_spec(const cjose_jwk_ec_keyspec *spec, cjose_err *err);
 
 /**
+ * Obtains the curve for the given (EC) JWK.
+ *
+ * \param jwk [in] The EC JWK to inspect
+ * \param err [out] An optional error object which can be used to get additional
+ *        information in the event of an error.
+ * \returns The curve type
+ */
+const cjose_jwk_ec_curve cjose_jwk_EC_get_curve(const cjose_jwk_t *jwk, cjose_err *err);
+
+/**
  * Creates a new symmetric octet JWK, using a secure random number generator.
  *
  * \b NOTE: The caller MUST call cjose_jwk_release() to release the JWK's
@@ -318,6 +331,23 @@ cjose_jwk_t *cjose_jwk_create_oct_spec(const uint8_t *data, size_t len, cjose_er
 cjose_jwk_t *cjose_jwk_import(const char *json, size_t len, cjose_err *err);
 
 /**
+ * Instantiates a new JWK given a JSON object conforming to JSON Web Key (JWK)
+ * IETF RFC 7518.
+ *
+ * \b NOTE: A successful call returns a new cjose_jwk_t object. It is the
+ * caller's responsibility to call cjose_jwk_release() to release the JWK when
+ * it is no longer needed.  Failure to do so will result in a memory leak.
+ *
+ * \param json A JSON document conforming to the Jose JWK specification.
+ * \param err [out] An optional error object which can be used to get additional
+ *        information in the event of an error.
+ * \returns A JWK object corresponding to the given JSON document.  In
+ *        the event the given JSON object is an invalid JWK representation, this
+ *        will return NULL.
+ */
+cjose_jwk_t *cjose_jwk_import_json(cjose_header_t *json, cjose_err *err);
+
+/**
  * Computes an ECDH ephemeral key as an HKDF hash of the derived shared
  * secret from a local EC key-pair and a peer's EC public key.  The result is
  * returned in the form of a new JWK of type oct.
@@ -332,12 +362,12 @@ cjose_jwk_t *cjose_jwk_import(const char *json, size_t len, cjose_err *err);
  * \returns A new JWK representing the ephemeral key, or NULL in the event of
  *        and error.
  */
-cjose_jwk_t *cjose_jwk_derive_ecdh_ephemeral_key(cjose_jwk_t *jwk_self, cjose_jwk_t *jwk_peer, cjose_err *err);
+cjose_jwk_t *cjose_jwk_derive_ecdh_ephemeral_key(const cjose_jwk_t *jwk_self, const cjose_jwk_t *jwk_peer, cjose_err *err);
 
 /**
  Deprecated.  Alias for cjose_jwk_derive_ecdh_ephemeral_key.
 */
-cjose_jwk_t *cjose_jwk_derive_ecdh_secret(cjose_jwk_t *jwk_self, cjose_jwk_t *jwk_peer, cjose_err *err);
+cjose_jwk_t *cjose_jwk_derive_ecdh_secret(const cjose_jwk_t *jwk_self, const cjose_jwk_t *jwk_peer, cjose_err *err);
 
 #ifdef __cplusplus
 }

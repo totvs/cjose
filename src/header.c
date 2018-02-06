@@ -12,6 +12,7 @@
 
 const char *CJOSE_HDR_ALG = "alg";
 const char *CJOSE_HDR_ALG_NONE = "none";
+const char *CJOSE_HDR_ALG_ECDH_ES = "ECDH-ES";
 const char *CJOSE_HDR_ALG_RSA_OAEP = "RSA-OAEP";
 const char *CJOSE_HDR_ALG_RSA1_5 = "RSA1_5";
 const char *CJOSE_HDR_ALG_A128KW = "A128KW";
@@ -40,6 +41,11 @@ const char *CJOSE_HDR_ENC_A256CBC_HS512 = "A256CBC-HS512";
 const char *CJOSE_HDR_CTY = "cty";
 
 const char *CJOSE_HDR_KID = "kid";
+
+const char *CJOSE_HDR_EPK = "epk";
+
+const char *CJOSE_HDR_APU = "apu";
+const char *CJOSE_HDR_APV = "apv";
 
 ////////////////////////////////////////////////////////////////////////////////
 cjose_header_t *cjose_header_new(cjose_err *err)
@@ -149,5 +155,5 @@ char *cjose_header_get_raw(cjose_header_t *header, const char *attr, cjose_err *
         return NULL;
     }
 
-    return json_dumps(value_obj, 0);
+    return json_dumps(value_obj, JSON_COMPACT);
 }
