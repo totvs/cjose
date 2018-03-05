@@ -25,10 +25,12 @@
 #include "include/jwe_int.h"
 #include "include/util_int.h"
 
-////////////////////////////////////////////////////////////////////////////////
-static bool _cjose_jwe_set_cek_a256gcm(cjose_jwe_t *jwe, const cjose_jwk_t *jwk, cjose_err *err);
 
-static bool _cjose_jwe_set_cek_aes_cbc(cjose_jwe_t *jwe, const cjose_jwk_t *jwk, cjose_err *err);
+
+////////////////////////////////////////////////////////////////////////////////
+static bool _cjose_jwe_set_cek_a256gcm(cjose_jwe_t *jwe, const cjose_jwk_t *jwk, bool prealloc, cjose_err *err);
+
+static bool _cjose_jwe_set_cek_aes_cbc(cjose_jwe_t *jwe, const cjose_jwk_t *jwk, bool prealloc, cjose_err *err);
 
 static bool
 _cjose_jwe_encrypt_ek_dir(_jwe_int_recipient_t *recipient, cjose_jwe_t *jwe, const cjose_jwk_t *jwk, cjose_err *err);
@@ -359,7 +361,7 @@ static bool _cjose_jwe_validate_alg(cjose_header_t *protected_header,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-static bool _cjose_jwe_set_cek_a256gcm(cjose_jwe_t *jwe, const cjose_jwk_t *jwk, cjose_err *err)
+static bool _cjose_jwe_set_cek_a256gcm(cjose_jwe_t *jwe, const cjose_jwk_t *jwk, bool prealloc, cjose_err *err)
 {
     // 256 bits = 32 bytes
     static const size_t keysize = 32;
@@ -373,7 +375,7 @@ static bool _cjose_jwe_set_cek_a256gcm(cjose_jwe_t *jwe, const cjose_jwk_t *jwk,
     if (NULL == jwk)
     {
         _cjose_release_cek(&jwe->cek, jwe->cek_len);
-        if (!_cjose_jwe_malloc(keysize, true, &jwe->cek, err))
+        if (!_cjose_jwe_malloc(keysize, !prealloc, &jwe->cek, err))
         {
             return false;
         }
@@ -402,7 +404,7 @@ static bool _cjose_jwe_set_cek_a256gcm(cjose_jwe_t *jwe, const cjose_jwk_t *jwk,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-static bool _cjose_jwe_set_cek_aes_cbc(cjose_jwe_t *jwe, const cjose_jwk_t *dummy_set_to_null_for_random, cjose_err *err)
+static bool _cjose_jwe_set_cek_aes_cbc(cjose_jwe_t *jwe, const cjose_jwk_t *cek, bool prealloc, cjose_err *err)
 {
 
     if (NULL != jwe->cek)
@@ -429,7 +431,7 @@ static bool _cjose_jwe_set_cek_aes_cbc(cjose_jwe_t *jwe, const cjose_jwk_t *dumm
 
     // allocate memory for the CEK and fill with random bytes or 0's
     _cjose_release_cek(&jwe->cek, jwe->cek_len);
-    if (!_cjose_jwe_malloc(jwe->cek_len, dummy_set_to_null_for_random == NULL, &jwe->cek, err))
+    if (!_cjose_jwe_malloc(jwe->cek_len, !prealloc, &jwe->cek, err))
     {
         return false;
     }
@@ -442,7 +444,7 @@ static bool
 _cjose_jwe_encrypt_ek_dir(_jwe_int_recipient_t *recipient, cjose_jwe_t *jwe, const cjose_jwk_t *jwk, cjose_err *err)
 {
     // for direct encryption, JWE sec 5.1, step 6: let CEK be the symmetric key.
-    if (!jwe->fns.set_cek(jwe, jwk, err))
+    if (!jwe->fns.set_cek(jwe, jwk, false, err))
     {
         return false;
     }
@@ -460,7 +462,7 @@ _cjose_jwe_decrypt_ek_dir(_jwe_int_recipient_t *recipient, cjose_jwe_t *jwe, con
 {
     // do not try and decrypt the ek. that's impossible.
     // instead... only try to realize the truth.  there is no ek.
-    return jwe->fns.set_cek(jwe, jwk, err);
+    return jwe->fns.set_cek(jwe, jwk, false, err);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -481,7 +483,7 @@ _cjose_jwe_encrypt_ek_aes_kw(_jwe_int_recipient_t *recipient, cjose_jwe_t *jwe, 
     }
 
     // generate random CEK
-    if (!jwe->fns.set_cek(jwe, NULL, err))
+    if (!jwe->fns.set_cek(jwe, NULL, false, err))
     {
         return false;
     }
@@ -538,7 +540,7 @@ _cjose_jwe_decrypt_ek_aes_kw(_jwe_int_recipient_t *recipient, cjose_jwe_t *jwe, 
     }
 
     // generate empty CEK so the the right amount of memory is allocated (abuse JWK parameter to empty)
-    if (!jwe->fns.set_cek(jwe, (const cjose_jwk_t *)1, err))
+    if (!jwe->fns.set_cek(jwe, NULL, true, err))
     {
         return false;
     }
@@ -577,7 +579,7 @@ static bool _cjose_jwe_encrypt_ek_rsa_padding(
     }
 
     // generate random cek
-    if (!jwe->fns.set_cek(jwe, NULL, err))
+    if (!jwe->fns.set_cek(jwe, NULL, false, err))
     {
         return false;
     }
