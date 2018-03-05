@@ -201,6 +201,8 @@ static void _self_encrypt_self_decrypt(const char *plain1)
 
     _self_encrypt_self_decrypt_with_key(CJOSE_HDR_ALG_A256KW, CJOSE_HDR_ENC_A256CBC_HS512, JWK_OCT, plain1);
 
+    _self_encrypt_self_decrypt_with_key(CJOSE_HDR_ALG_A128KW, CJOSE_HDR_ENC_A256GCM, JWK_OCT, plain1);
+
     _self_encrypt_self_decrypt_with_key(CJOSE_HDR_ALG_ECDH_ES, CJOSE_HDR_ENC_A256GCM, JWK_EC, plain1);
 }
 
