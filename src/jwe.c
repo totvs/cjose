@@ -28,9 +28,9 @@
 
 
 ////////////////////////////////////////////////////////////////////////////////
-static bool _cjose_jwe_set_cek_a256gcm(cjose_jwe_t *jwe, const cjose_jwk_t *jwk, bool prealloc, cjose_err *err);
+static bool _cjose_jwe_set_cek_a256gcm(cjose_jwe_t *jwe, const cjose_jwk_t *jwk, bool random, cjose_err *err);
 
-static bool _cjose_jwe_set_cek_aes_cbc(cjose_jwe_t *jwe, const cjose_jwk_t *jwk, bool prealloc, cjose_err *err);
+static bool _cjose_jwe_set_cek_aes_cbc(cjose_jwe_t *jwe, const cjose_jwk_t *jwk, bool random, cjose_err *err);
 
 static bool
 _cjose_jwe_encrypt_ek_dir(_jwe_int_recipient_t *recipient, cjose_jwe_t *jwe, const cjose_jwk_t *jwk, cjose_err *err);
@@ -361,7 +361,7 @@ static bool _cjose_jwe_validate_alg(cjose_header_t *protected_header,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-static bool _cjose_jwe_set_cek_a256gcm(cjose_jwe_t *jwe, const cjose_jwk_t *jwk, bool prealloc, cjose_err *err)
+static bool _cjose_jwe_set_cek_a256gcm(cjose_jwe_t *jwe, const cjose_jwk_t *jwk, bool random, cjose_err *err)
 {
     // 256 bits = 32 bytes
     static const size_t keysize = 32;
@@ -375,7 +375,7 @@ static bool _cjose_jwe_set_cek_a256gcm(cjose_jwe_t *jwe, const cjose_jwk_t *jwk,
     if (NULL == jwk)
     {
         _cjose_release_cek(&jwe->cek, jwe->cek_len);
-        if (!_cjose_jwe_malloc(keysize, !prealloc, &jwe->cek, err))
+        if (!_cjose_jwe_malloc(keysize, random, &jwe->cek, err))
         {
             return false;
         }
@@ -404,7 +404,7 @@ static bool _cjose_jwe_set_cek_a256gcm(cjose_jwe_t *jwe, const cjose_jwk_t *jwk,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-static bool _cjose_jwe_set_cek_aes_cbc(cjose_jwe_t *jwe, const cjose_jwk_t *cek, bool prealloc, cjose_err *err)
+static bool _cjose_jwe_set_cek_aes_cbc(cjose_jwe_t *jwe, const cjose_jwk_t *jwk, bool random, cjose_err *err)
 {
 
     if (NULL != jwe->cek)
@@ -422,20 +422,42 @@ static bool _cjose_jwe_set_cek_aes_cbc(cjose_jwe_t *jwe, const cjose_jwk_t *cek,
     const char *enc = json_string_value(enc_obj);
 
     // determine the CEK key size based on the encryption algorithm
+    size_t keysize = 0;
     if (strcmp(enc, CJOSE_HDR_ENC_A128CBC_HS256) == 0)
-        jwe->cek_len = 32;
+        keysize = 32;
     if (strcmp(enc, CJOSE_HDR_ENC_A192CBC_HS384) == 0)
-        jwe->cek_len = 48;
+        keysize = 48;
     if (strcmp(enc, CJOSE_HDR_ENC_A256CBC_HS512) == 0)
-        jwe->cek_len = 64;
+        keysize = 64;
 
-    // allocate memory for the CEK and fill with random bytes or 0's
-    _cjose_release_cek(&jwe->cek, jwe->cek_len);
-    if (!_cjose_jwe_malloc(jwe->cek_len, !prealloc, &jwe->cek, err))
+    if (NULL == jwk)
     {
-        return false;
+        // allocate memory for the CEK and fill with random bytes or 0's
+        _cjose_release_cek(&jwe->cek, jwe->cek_len);
+        if (!_cjose_jwe_malloc(keysize, !random, &jwe->cek, err))
+        {
+            return false;
+        }
+        jwe->cek_len = keysize;
     }
+    else
+    {
+        // if a JWK is provided, it must be a symmetric key of correct size
+        if (CJOSE_JWK_KTY_OCT != cjose_jwk_get_kty(jwk, err) || jwk->keysize != keysize * 8 || NULL == jwk->keydata)
+        {
+            CJOSE_ERROR(err, CJOSE_ERR_INVALID_ARG);
+            return false;
+        }
 
+        // copy the key material directly from jwk to the jwe->cek
+        _cjose_release_cek(&jwe->cek, jwe->cek_len);
+        if (!_cjose_jwe_malloc(keysize, false, &jwe->cek, err))
+        {
+            return false;
+        }
+        memcpy(jwe->cek, jwk->keydata, keysize);
+        jwe->cek_len = keysize;
+    }
     return true;
 }
 
@@ -483,7 +505,7 @@ _cjose_jwe_encrypt_ek_aes_kw(_jwe_int_recipient_t *recipient, cjose_jwe_t *jwe, 
     }
 
     // generate random CEK
-    if (!jwe->fns.set_cek(jwe, NULL, false, err))
+    if (!jwe->fns.set_cek(jwe, NULL, true, err))
     {
         return false;
     }
@@ -539,8 +561,7 @@ _cjose_jwe_decrypt_ek_aes_kw(_jwe_int_recipient_t *recipient, cjose_jwe_t *jwe, 
         return false;
     }
 
-    // generate empty CEK so the the right amount of memory is allocated (abuse JWK parameter to empty)
-    if (!jwe->fns.set_cek(jwe, NULL, true, err))
+    if (!jwe->fns.set_cek(jwe, NULL, false, err))
     {
         return false;
     }
@@ -579,7 +600,7 @@ static bool _cjose_jwe_encrypt_ek_rsa_padding(
     }
 
     // generate random cek
-    if (!jwe->fns.set_cek(jwe, NULL, false, err))
+    if (!jwe->fns.set_cek(jwe, NULL, true, err))
     {
         return false;
     }
