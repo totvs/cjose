@@ -1,13 +1,25 @@
 # Release Notes #
 
-<a name=""></a>
+<a name="0.6.1"></a>
+## [0.6.1](https://github.com/cisco/cjose/0.6.0..0.6.1)  (2018-04-12)
+
+### Update
+
+* Better support for AES-CBC-HMAC with other key management algs ([602555ff3fbd34e875bf0e7b88f4d94dc6000e8b](https://github.com/cisco/cjose/commit/602555ff3fbd34e875bf0e7b88f4d94dc6000e8b))
+
+### Fix
+
+* Explicit defined() usage for CJOSE_OPENSSL_11X ([b6665deae2aec3b68d88edb293b1f6c137e624ce](https://github.com/cisco/cjose/commit/b6665deae2aec3b68d88edb293b1f6c137e624ce))
+* Bad JWE crashes _cjose_jwe_set_cek_a256gcm ([fb24d6f264fd83d0228a65c2f06e27dba2495ceb](https://github.com/cisco/cjose/commit/fb24d6f264fd83d0228a65c2f06e27dba2495ceb))
+
+<a name="0.6.0"></a>
 ## [0.6.0](https://github.com/cisco/cjose/0.5.1..0.6.0)  (2018-02-06)
 
 ### Update
 
-* support ECDH-ES  ([1250eff10fa178937aea1924887d114c8ba943c2](https://github.com/linuxwolf/cjose/commit/1250eff10fa178937aea1924887d114c8ba943c2))
-* compile with LibreSSL  ([8693c22aabf31313a4002838e124e93879bbb50b](https://github.com/linuxwolf/cjose/commit/8693c22aabf31313a4002838e124e93879bbb50b))
-* Support multiple recipients and JSON serialization for JWE  ([e569ee824fd5af8654fb0054952f6c7b9d038ce6](https://github.com/linuxwolf/cjose/commit/e569ee824fd5af8654fb0054952f6c7b9d038ce6))
+* support ECDH-ES  ([1250eff10fa178937aea1924887d114c8ba943c2](https://github.com/cisco/cjose/commit/1250eff10fa178937aea1924887d114c8ba943c2))
+* compile with LibreSSL  ([8693c22aabf31313a4002838e124e93879bbb50b](https://github.com/cisco/cjose/commit/8693c22aabf31313a4002838e124e93879bbb50b))
+* Support multiple recipients and JSON serialization for JWE  ([e569ee824fd5af8654fb0054952f6c7b9d038ce6](https://github.com/cisco/cjose/commit/e569ee824fd5af8654fb0054952f6c7b9d038ce6))
 
 
 <a name="0.5.1"></a>
