@@ -357,17 +357,27 @@ cjose_jwk_t *cjose_jwk_import_json(cjose_header_t *json, cjose_err *err);
  *
  * \param jwk_self [in] The caller's own EC key pair.
  * \param jwk_peer [in] The peer's EC public key.
+ * \param salt [in] An optional salt to apply to the HMAC calculation. Unless FIPS mode is required this can be empty.
+ * \param salt_len [in] The length of the optional salt.
  * \param err [out] An optional error object which can be used to get additional
  *        information in the event of an error.
  * \returns A new JWK representing the ephemeral key, or NULL in the event of
  *        and error.
  */
-cjose_jwk_t *cjose_jwk_derive_ecdh_ephemeral_key(const cjose_jwk_t *jwk_self, const cjose_jwk_t *jwk_peer, cjose_err *err);
+cjose_jwk_t *cjose_jwk_derive_ecdh_ephemeral_key(const cjose_jwk_t *jwk_self, 
+                                                 const cjose_jwk_t *jwk_peer, 
+                                                 const uint8_t *salt,
+                                                 size_t salt_len, 
+                                                 cjose_err *err);
 
 /**
  Deprecated.  Alias for cjose_jwk_derive_ecdh_ephemeral_key.
 */
-cjose_jwk_t *cjose_jwk_derive_ecdh_secret(const cjose_jwk_t *jwk_self, const cjose_jwk_t *jwk_peer, cjose_err *err);
+cjose_jwk_t *cjose_jwk_derive_ecdh_secret(const cjose_jwk_t *jwk_self, 
+                                          const cjose_jwk_t *jwk_peer, 
+                                          const uint8_t *salt,
+                                          size_t salt_len, 
+                                          cjose_err *err);
 
 #ifdef __cplusplus
 }
