@@ -26,7 +26,8 @@ extern "C" {
 #endif
 
 /** Enumeration of supported JSON Web Key (JWK) types */
-typedef enum {
+typedef enum
+{
     /** RSA Public (or Private) Key */
     CJOSE_JWK_KTY_RSA = 1,
     /** Elliptic Curve Public (or Private) Key */
@@ -212,7 +213,8 @@ cjose_jwk_t *cjose_jwk_create_RSA_random(size_t keysize, const uint8_t *e, size_
 cjose_jwk_t *cjose_jwk_create_RSA_spec(const cjose_jwk_rsa_keyspec *spec, cjose_err *err);
 
 /** Enumeration of supported Elliptic-Curve types */
-typedef enum {
+typedef enum
+{
     /** NIST P-256 Prime Curve (secp256r1) */
     CJOSE_JWK_EC_P_256 = NID_X9_62_prime256v1,
     /** NIST P-384 Prime Curve (secp384r1) */
@@ -364,20 +366,14 @@ cjose_jwk_t *cjose_jwk_import_json(cjose_header_t *json, cjose_err *err);
  * \returns A new JWK representing the ephemeral key, or NULL in the event of
  *        and error.
  */
-cjose_jwk_t *cjose_jwk_derive_ecdh_ephemeral_key(const cjose_jwk_t *jwk_self, 
-                                                 const cjose_jwk_t *jwk_peer, 
-                                                 const uint8_t *salt,
-                                                 size_t salt_len, 
-                                                 cjose_err *err);
+cjose_jwk_t *cjose_jwk_derive_ecdh_ephemeral_key(
+    const cjose_jwk_t *jwk_self, const cjose_jwk_t *jwk_peer, const uint8_t *salt, size_t salt_len, cjose_err *err);
 
 /**
  Deprecated.  Alias for cjose_jwk_derive_ecdh_ephemeral_key.
 */
-cjose_jwk_t *cjose_jwk_derive_ecdh_secret(const cjose_jwk_t *jwk_self, 
-                                          const cjose_jwk_t *jwk_peer, 
-                                          const uint8_t *salt,
-                                          size_t salt_len, 
-                                          cjose_err *err);
+cjose_jwk_t *cjose_jwk_derive_ecdh_secret(
+    const cjose_jwk_t *jwk_self, const cjose_jwk_t *jwk_peer, const uint8_t *salt, size_t salt_len, cjose_err *err);
 
 #ifdef __cplusplus
 }
