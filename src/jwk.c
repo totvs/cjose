@@ -1865,7 +1865,7 @@ bool cjose_jwk_hkdf(const EVP_MD *md,
     unsigned char prk[EVP_MAX_MD_SIZE];
     if (NULL == HMAC(md, salt, salt_len, ikm, ikm_len, prk, &prk_len))
     {
-        CJOSE_ERROR(err, CJOSE_ERR_INVALID_ARG);
+        CJOSE_ERROR(err, CJOSE_ERR_CRYPTO);
         return false;
     }
 
@@ -1873,7 +1873,7 @@ bool cjose_jwk_hkdf(const EVP_MD *md,
     const unsigned char t[] = { 0x01 };
     if (NULL == HMAC(md, prk, prk_len, t, sizeof(t), okm, NULL))
     {
-        CJOSE_ERROR(err, CJOSE_ERR_INVALID_ARG);
+        CJOSE_ERROR(err, CJOSE_ERR_CRYPTO);
         return false;
     }
 
