@@ -39,7 +39,7 @@ static uint8_t *_apply_lendata(const uint8_t *data, const size_t len, uint8_t *b
 {
     uint8_t *ptr = buffer;
 
-    ptr  =_apply_uint32((uint32_t)len, ptr);
+    ptr  =_apply_uint32(len, ptr);
     if (0 < len)
     {
         memcpy(ptr, data, len);
@@ -99,7 +99,7 @@ bool cjose_concatkdf_create_otherinfo(const char *alg,
     ptr = _apply_lendata((const uint8_t *)alg, algLen, ptr);
     ptr = _apply_lendata(apu, apuLen, ptr);
     ptr = _apply_lendata(apv, apvLen, ptr);
-    ptr = _apply_uint32((uint32_t)keylen, ptr);
+    ptr = _apply_uint32(keylen, ptr);
 
     *otherinfoLen = bufferLen;
     *otherinfo = buffer;
@@ -141,7 +141,7 @@ uint8_t *cjose_concatkdf_derive(const size_t keylen,
     }
 
     size_t offset = 0, amt = keylen;
-    for (uint32_t idx = 1; N >= idx; idx++)
+    for (int idx = 1; N >= idx; idx++)
     {
         uint8_t counter[4];
         _apply_uint32(idx, counter);
