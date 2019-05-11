@@ -1695,12 +1695,14 @@ _cjose_jwk_evp_key_from_ec_key_fail:
     return false;
 }
 
-cjose_jwk_t *cjose_jwk_derive_ecdh_secret(const cjose_jwk_t *jwk_self, const cjose_jwk_t *jwk_peer, cjose_err *err)
+cjose_jwk_t *cjose_jwk_derive_ecdh_secret(
+    const cjose_jwk_t *jwk_self, const cjose_jwk_t *jwk_peer, const uint8_t *salt, size_t salt_len, cjose_err *err)
 {
-    return cjose_jwk_derive_ecdh_ephemeral_key(jwk_self, jwk_peer, err);
+    return cjose_jwk_derive_ecdh_ephemeral_key(jwk_self, jwk_peer, salt, salt_len, err);
 }
 
-cjose_jwk_t *cjose_jwk_derive_ecdh_ephemeral_key(const cjose_jwk_t *jwk_self, const cjose_jwk_t *jwk_peer, cjose_err *err)
+cjose_jwk_t *cjose_jwk_derive_ecdh_ephemeral_key(
+    const cjose_jwk_t *jwk_self, const cjose_jwk_t *jwk_peer, const uint8_t *salt, size_t salt_len, cjose_err *err)
 {
     uint8_t *secret = NULL;
     size_t secret_len = 0;
@@ -1713,11 +1715,10 @@ cjose_jwk_t *cjose_jwk_derive_ecdh_ephemeral_key(const cjose_jwk_t *jwk_self, co
         goto _cjose_jwk_derive_shared_secret_fail;
     }
 
-    // HKDF of the DH shared secret (SHA256, no salt, no info, 256 bit expand)
+    // HKDF of the DH shared secret (SHA256, no info, 256 bit expand)
     ephemeral_key_len = 32;
     ephemeral_key = (uint8_t *)cjose_get_alloc()(ephemeral_key_len);
-    if (!cjose_jwk_hkdf(EVP_sha256(), (uint8_t *)"", 0, (uint8_t *)"", 0, secret, secret_len, ephemeral_key, ephemeral_key_len,
-                        err))
+    if (!cjose_jwk_hkdf(EVP_sha256(), salt, salt_len, (uint8_t *)"", 0, secret, secret_len, ephemeral_key, ephemeral_key_len, err))
     {
         goto _cjose_jwk_derive_shared_secret_fail;
     }
@@ -1747,11 +1748,8 @@ _cjose_jwk_derive_shared_secret_fail:
     return NULL;
 }
 
-bool cjose_jwk_derive_ecdh_bits(const cjose_jwk_t *jwk_self,
-                                const cjose_jwk_t *jwk_peer,
-                                uint8_t **output,
-                                size_t *output_len,
-                                cjose_err *err)
+bool cjose_jwk_derive_ecdh_bits(
+    const cjose_jwk_t *jwk_self, const cjose_jwk_t *jwk_peer, uint8_t **output, size_t *output_len, cjose_err *err)
 {
     EVP_PKEY_CTX *ctx = NULL;
     EVP_PKEY *pkey_self = NULL;
@@ -1865,11 +1863,19 @@ bool cjose_jwk_hkdf(const EVP_MD *md,
     // HKDF-Extract, HMAC-SHA256(salt, IKM) -> PRK
     unsigned int prk_len;
     unsigned char prk[EVP_MAX_MD_SIZE];
-    HMAC(md, salt, salt_len, ikm, ikm_len, prk, &prk_len);
+    if (NULL == HMAC(md, salt, salt_len, ikm, ikm_len, prk, &prk_len))
+    {
+        CJOSE_ERROR(err, CJOSE_ERR_CRYPTO);
+        return false;
+    }
 
     // HKDF-Expand, HMAC-SHA256(PRK,0x01) -> OKM
     const unsigned char t[] = { 0x01 };
-    HMAC(md, prk, prk_len, t, sizeof(t), okm, NULL);
+    if (NULL == HMAC(md, prk, prk_len, t, sizeof(t), okm, NULL))
+    {
+        CJOSE_ERROR(err, CJOSE_ERR_CRYPTO);
+        return false;
+    }
 
     return true;
 }
