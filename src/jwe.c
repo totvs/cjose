@@ -1246,7 +1246,7 @@ static bool _cjose_jwe_decrypt_dat_aes_gcm(cjose_jwe_t *jwe, cjose_err *err)
     }
     const char *enc = json_string_value(enc_obj);
 
-    // get AES CM cipher
+    // get AES GCM cipher
     const EVP_CIPHER *cipher = NULL;
 
     if (strcmp(enc, CJOSE_HDR_ENC_A128GCM) == 0)
@@ -1271,7 +1271,7 @@ static bool _cjose_jwe_decrypt_dat_aes_gcm(cjose_jwe_t *jwe, cjose_err *err)
     }
     EVP_CIPHER_CTX_init(ctx);
 
-    // initialize context for decryption using A256GCM cipher and CEK and IV
+    // initialize context for decryption using AES GCM cipher and CEK and IV
     if (EVP_DecryptInit_ex(ctx, cipher, NULL, jwe->cek, jwe->enc_iv.raw) != 1)
     {
         CJOSE_ERROR(err, CJOSE_ERR_CRYPTO);
