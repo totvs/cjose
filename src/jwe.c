@@ -650,6 +650,15 @@ static bool _cjose_jwe_decrypt_ek_rsa_padding(
         return false;
     }
 
+    // jwk must have the necessary private parts set
+	BIGNUM *rsa_n = NULL, *rsa_e = NULL, *rsa_d = NULL;
+	_cjose_jwk_rsa_get((RSA *)jwk->keydata, &rsa_n, &rsa_e, &rsa_d);
+	if (NULL == rsa_e || NULL == rsa_n || NULL == rsa_d)
+	{
+		CJOSE_ERROR(err, CJOSE_ERR_INVALID_ARG);
+		return false;
+	}
+
     // we don't know the size of the key to expect, but must be < RSA_size
     _cjose_release_cek(&jwe->cek, jwe->cek_len);
     size_t buflen = RSA_size((RSA *)jwk->keydata);
