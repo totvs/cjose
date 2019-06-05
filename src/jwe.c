@@ -659,12 +659,14 @@ static bool _cjose_jwe_decrypt_ek_rsa_padding(
     }
 
     // decrypt the CEK using RSA v1.5 or OAEP padding
-    jwe->cek_len = RSA_private_decrypt(recipient->enc_key.raw_len, recipient->enc_key.raw, jwe->cek, (RSA *)jwk->keydata, padding);
-    if (-1 == jwe->cek_len)
+    int len = RSA_private_decrypt(recipient->enc_key.raw_len, recipient->enc_key.raw, jwe->cek, (RSA *)jwk->keydata, padding);
+    if (-1 == len)
     {
         CJOSE_ERROR(err, CJOSE_ERR_CRYPTO);
         return false;
     }
+
+    jwe->cek_len = len;
 
     return true;
 }
