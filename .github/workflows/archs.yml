@@ -41,8 +41,8 @@ jobs:
         run: |
           ./configure CFLAGS="-g -O0" LDFLAGS="-lrt"
           make check
-          cp test-suite.log "/logs/${logfilename}"
-          echo "Copied test-suite.log to /logs/${logfilename}"
+          cat test/*.log >> "/logs/${logfilename}"
+          echo "Copied test logs to /logs/${logfilename}"
           
     - name: Results
       run: |
