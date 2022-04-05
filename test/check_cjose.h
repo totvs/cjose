@@ -26,8 +26,7 @@ Suite *cjose_concatkdf_suite();
         const uint8_t *_chk_y = (Y);                                                                                             \
         const size_t _chk_len = (LEN);                                                                                           \
         ck_assert_msg(0 OP memcmp(_chk_x, _chk_y, _chk_len),                                                                     \
-                      "Assertion '" #X #OP #Y "' failed: " #LEN "==%z, " #X "==0x%zx, " #Y "==0x%zx",                           \
-                      _chk_len, _chk_x, _chk_y);                                                                                 \
+                      "Assertion '" #X #OP #Y "' failed: " #LEN "==%z, " #X "==0x%zx, " #Y "==0x%zx", _chk_len, _chk_x, _chk_y); \
     } while (0);
 
 #define ck_assert_bin_eq(X, Y, LEN) _ck_assert_bin(X, ==, Y, LEN)

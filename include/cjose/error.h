@@ -38,7 +38,8 @@ extern "C" {
 /**
  * Enumeration of defined error codes.
  */
-typedef enum {
+typedef enum
+{
     /** No error */
     CJOSE_ERR_NONE = 0,
 

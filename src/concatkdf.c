@@ -7,7 +7,6 @@
 
 #include "include/concatkdf_int.h"
 
-
 #ifdef _WIN32
 #include <Winsock2.h>
 #include <malloc.h>
@@ -39,7 +38,7 @@ static uint8_t *_apply_lendata(const uint8_t *data, const size_t len, uint8_t *b
 {
     uint8_t *ptr = buffer;
 
-    ptr  =_apply_uint32(len, ptr);
+    ptr = _apply_uint32(len, ptr);
     if (0 < len)
     {
         memcpy(ptr, data, len);
@@ -48,20 +47,13 @@ static uint8_t *_apply_lendata(const uint8_t *data, const size_t len, uint8_t *b
     return ptr;
 }
 
-size_t min_len(size_t a, size_t b)
-{
-    return (a < b) ? a : b;
-}
+size_t min_len(size_t a, size_t b) { return (a < b) ? a : b; }
 
 ////////////////////////////////////////////////////////////////////////////////
-bool cjose_concatkdf_create_otherinfo(const char *alg,
-                                      const size_t keylen,
-                                      cjose_header_t *hdr,
-                                      uint8_t **otherinfo,
-                                      size_t *otherinfoLen,
-                                      cjose_err *err)
+bool cjose_concatkdf_create_otherinfo(
+    const char *alg, const size_t keylen, cjose_header_t *hdr, uint8_t **otherinfo, size_t *otherinfoLen, cjose_err *err)
 {
-    bool result =  false;
+    bool result = false;
     uint8_t *apu = NULL, *apv = NULL;
     size_t apuLen = 0, apvLen = 0;
 
@@ -85,10 +77,7 @@ bool cjose_concatkdf_create_otherinfo(const char *alg,
     }
 
     const size_t algLen = strlen(alg);
-    const size_t bufferLen = (4 + algLen) +
-                             (4 + apuLen) +
-                             (4 + apvLen) +
-                             4;
+    const size_t bufferLen = (4 + algLen) + (4 + apuLen) + (4 + apvLen) + 4;
     uint8_t *buffer = cjose_get_alloc()(bufferLen);
     if (NULL == buffer)
     {
@@ -146,12 +135,10 @@ uint8_t *cjose_concatkdf_derive(const size_t keylen,
         uint8_t counter[4];
         _apply_uint32(idx, counter);
 
-        uint8_t* hash = STACK_ALLOC(hashlen * sizeof(uint8_t));
-        if (1 != EVP_DigestInit_ex(ctx, dgst, NULL) ||
-            1 != EVP_DigestUpdate(ctx, counter, sizeof(counter)) ||
-            1 != EVP_DigestUpdate(ctx, ikm, ikmLen) ||
-            1 != EVP_DigestUpdate(ctx, otherinfo, otherinfoLen) ||
-            1 != EVP_DigestFinal_ex(ctx, hash, NULL))
+        uint8_t *hash = STACK_ALLOC(hashlen * sizeof(uint8_t));
+        if (1 != EVP_DigestInit_ex(ctx, dgst, NULL) || 1 != EVP_DigestUpdate(ctx, counter, sizeof(counter))
+            || 1 != EVP_DigestUpdate(ctx, ikm, ikmLen) || 1 != EVP_DigestUpdate(ctx, otherinfo, otherinfoLen)
+            || 1 != EVP_DigestFinal_ex(ctx, hash, NULL))
         {
             CJOSE_ERROR(err, CJOSE_ERR_CRYPTO);
             goto concatkdf_derive_finish;
@@ -172,4 +159,3 @@ concatkdf_derive_finish:
 
     return derived;
 }
-

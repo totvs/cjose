@@ -99,10 +99,7 @@ static const cjose_jwk_t *cjose_multi_key_locator(cjose_jwe_t *jwe, cjose_header
     return NULL;
 }
 
-static const cjose_jwk_t *cjose_multi_key_locator_none(cjose_jwe_t *jwe, cjose_header_t *hdr, void *data)
-{
-    return NULL;
-}
+static const cjose_jwk_t *cjose_multi_key_locator_none(cjose_jwe_t *jwe, cjose_header_t *hdr, void *data) { return NULL; }
 
 START_TEST(test_cjose_jwe_node_jose_encrypt_self_decrypt)
 {
@@ -271,7 +268,8 @@ START_TEST(test_cjose_jwe_self_encrypt_self_decrypt)
 }
 END_TEST
 
-static void _self_encrypt_self_decrypt_with_key_iv(const char *alg, const char *enc, const char *key, size_t iv_len, const char *plain1)
+static void
+_self_encrypt_self_decrypt_with_key_iv(const char *alg, const char *enc, const char *key, size_t iv_len, const char *plain1)
 {
     cjose_err err;
 
@@ -405,7 +403,6 @@ START_TEST(test_cjose_jwe_self_encrypt_self_decrypt_iv)
                                   "eum fugiat quo voluptas nulla pariatur?");
 }
 END_TEST
-
 
 START_TEST(test_cjose_jwe_self_encrypt_self_decrypt_short) { _self_encrypt_self_decrypt("Setec Astronomy"); }
 END_TEST

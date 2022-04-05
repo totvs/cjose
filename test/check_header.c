@@ -65,12 +65,14 @@ START_TEST(test_cjose_header_set_get)
     enc_get = cjose_header_get(header, CJOSE_HDR_ENC, &err);
     ck_assert_msg(NULL != enc_get, "cjose_header_get failed to get ENC");
 
-    ck_assert_msg(!strcmp(alg_set, alg_get), "cjose_header_get failed, "
-                                             "expected: %s, found: %s",
+    ck_assert_msg(!strcmp(alg_set, alg_get),
+                  "cjose_header_get failed, "
+                  "expected: %s, found: %s",
                   ((alg_set) ? alg_set : "null"), ((alg_get) ? alg_get : "null"));
 
-    ck_assert_msg(!strcmp(enc_set, enc_get), "cjose_header_get failed, "
-                                             "expected: %s, found: %s",
+    ck_assert_msg(!strcmp(enc_set, enc_get),
+                  "cjose_header_get failed, "
+                  "expected: %s, found: %s",
                   ((enc_set) ? enc_set : "null"), ((enc_get) ? enc_get : "null"));
 
     cjose_header_release(header);
@@ -95,8 +97,9 @@ START_TEST(test_cjose_header_set_get_raw)
     epk_get = cjose_header_get_raw(header, CJOSE_HDR_EPK, &err);
     ck_assert_msg(NULL != epk_get, "cjose_header_get_raw failed to get EPK");
 
-    ck_assert_msg(!strcmp(epk_set, epk_get), "cjose_header_get_raw failed, "
-                                             "expected: %s, found %s",
+    ck_assert_msg(!strcmp(epk_set, epk_get),
+                  "cjose_header_get_raw failed, "
+                  "expected: %s, found %s",
                   ((epk_set) ? epk_set : "null"), ((epk_get) ? epk_get : "null"));
 
     cjose_header_release(header);

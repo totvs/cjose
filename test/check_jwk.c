@@ -1015,8 +1015,9 @@ START_TEST(test_cjose_jwk_import_valid)
     {
         // do import
         jwk = cjose_jwk_import(JWK[i], strlen(JWK[i]), &err);
-        ck_assert_msg(NULL != jwk, "expected a cjose_jwk_t, but got NULL (%s) : "
-                                   "%s, file: %s, function: %s, line: %ld",
+        ck_assert_msg(NULL != jwk,
+                      "expected a cjose_jwk_t, but got NULL (%s) : "
+                      "%s, file: %s, function: %s, line: %ld",
                       JWK[i], err.message, err.file, err.function, err.line);
 
         // get json representation of "before"
