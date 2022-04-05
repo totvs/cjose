@@ -8,6 +8,7 @@
 * add support for A128GCM and A192GCM encryption (https://github.com/zmartzone/cjose/pull/4)
 * encode JWS as compact JSON (https://github.com/zmartzone/cjose/pull/8) ; thanks @rnapier
 * extract cjose_jwe_encrypt_iv to allow explicit IV (https://github.com/zmartzone/cjose/pull/9) ; thanks @rnapier
+* allow compilation against OpenSSL 3 with "#define OPENSSL_API_COMPAT 0x10000000L"
 
 ### Fix
 
