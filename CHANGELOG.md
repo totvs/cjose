@@ -1,5 +1,26 @@
 # Release Notes #
 
+<a name="0.6.2"></a>
+## [0.6.2](https://github.com/zmartzone/cjose/tree/version-0.6.2.x)  (2020-04-05)
+
+### Update
+
+* add support for A128GCM and A192GCM encryption (https://github.com/zmartzone/cjose/pull/4)
+* encode JWS as compact JSON (https://github.com/zmartzone/cjose/pull/8) ; thanks @rnapier
+* extract cjose_jwe_encrypt_iv to allow explicit IV (https://github.com/zmartzone/cjose/pull/9) ; thanks @rnapier
+
+### Fix
+
+* cleanup some warnings about \param lines in header files (https://github.com/zmartzone/cjose/pull/1) ; thanks @jogu
+* preserve key order in order to be able to compare serialized JWTs (https://github.com/zmartzone/cjose/pull/2)
+* minor updates for conformance (https://github.com/zmartzone/cjose/pull/3) ; thanks @ajishna
+* check that JWE object has any CEK at all, return error if it doesn't (https://github.com/zmartzone/cjose/pull/5) ; thanks @veselov
+* fix double free on decrypt ek rsa padding failure (https://github.com/zmartzone/cjose/pull/6)
+* replace calls to free with cjose_get_dealloc() in _cjose_jws_build_hdr (https://github.com/zmartzone/cjose/pull/7) ; thanks @zachmann
+* fix buffer overflow in test_cjose_jwe_multiple_recipients (https://github.com/zmartzone/cjose/pull/10) ; thanks @mpsun
+* use fixed size of IV size of 16Byte for AES-CBC (https://github.com/zmartzone/cjose/pull/11) ; thanks @securedimensions
+* fix memory leak already addressed in _cjose_jws_build_dig_sha when a jws is reused for a validation (https://github.com/zmartzone/cjose/pull/12) ; thanks @traeak
+
 <a name="0.6.1"></a>
 ## [0.6.1](https://github.com/cisco/cjose/0.6.0..0.6.1)  (2018-04-12)
 

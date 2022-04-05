@@ -2,6 +2,8 @@
 
 Implementation of JOSE for C/C++
 
+**This is a maintance fork of the - apparently abandoned - [cisco/cjose](https://github.com/cisco/cjose) project.**
+
 ## Prerequisites ##
 
 *MAC OS X* All of the prerequisites can be installed via [brew](http://brew.sh/).
