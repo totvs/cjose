@@ -21,6 +21,9 @@
 * fix buffer overflow in test_cjose_jwe_multiple_recipients (https://github.com/zmartzone/cjose/pull/10) ; thanks @mpsun
 * use fixed size of IV size of 16Byte for AES-CBC (https://github.com/zmartzone/cjose/pull/11) ; thanks @securedimensions
 * fix memory leak already addressed in _cjose_jws_build_dig_sha when a jws is reused for a validation (https://github.com/zmartzone/cjose/pull/12) ; thanks @traeak
+* compile against older versions of check (https://github.com/cisco/cjose/issues/91) ; thanks @treydock
+* rename free() to free_func() in struct key_fntable for memory leak detectors (https://github.com/cisco/cjose/issues/109) ; thanks @marcstern
+* check result of cek = cjose_get_alloc()(cek_len) in jwe.c (https://github.com/cisco/cjose/issues/110) ; thanks @marcstern 
 
 <a name="0.6.1"></a>
 ## [0.6.1](https://github.com/cisco/cjose/0.6.0..0.6.1)  (2018-04-12)
