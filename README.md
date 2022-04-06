@@ -1,8 +1,12 @@
+[![Build Status](https://github.com/zmartzone/cjose/actions/workflows/build.yml/badge.svg)](https://github.com/zmartzone/cjose/actions/workflows/build.yml)
+[![Architectures Status](https://github.com/zmartzone/cjose/actions/workflows/archs.yml/badge.svg)](https://github.com/zmartzone/cjose/actions/workflows/archs.yml)
+[![CodeQL Analysis](https://github.com/zmartzone/cjose/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/zmartzone/cjose/actions/workflows/codeql-analysis.yml)
+
 # cjose #
 
-Implementation of JOSE for C/C++
+*This is a maintance fork of the [cisco/cjose](https://github.com/cisco/cjose) project.*
 
-**This is a maintance fork of the - apparently abandoned - [cisco/cjose](https://github.com/cisco/cjose) project.**
+Implementation of JOSE for C/C++
 
 ## Prerequisites ##
 
