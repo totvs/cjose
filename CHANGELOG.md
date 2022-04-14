@@ -1,7 +1,7 @@
 # Release Notes #
 
 <a name="0.6.2"></a>
-## [0.6.2](https://github.com/zmartzone/cjose/tree/version-0.6.2.x)  (2020-04-05)
+## [0.6.2](https://github.com/zmartzone/cjose/tree/version-0.6.2.x)  (2022-04-14)
 
 ### Update
 
