@@ -1,7 +1,13 @@
 # Release Notes #
 
-<a name="0.6.2"></a>
-## [0.6.2](https://github.com/zmartzone/cjose/tree/version-0.6.2.x)  (2022-04-14)
+<a name="v0.6.2.1"></a>
+## [v0.6.2.1](https://github.com/zmartzone/cjose/compare/v0.6.2...v0.6.2.1)  (2022-10-24)
+* preserve key order in cjose_header_get_raw as well (https://github.com/zmartzone/cjose/pull/16)
+* fix a memory leak in cjose_jws_import() for invalid JWS (https://github.com/zmartzone/cjose/pull/14)
+* don't use STACK_ALLOC in cjose_concatkdf_derive (https://github.com/zmartzone/cjose/pull/15)
+
+<a name="v0.6.2"></a>
+## [v0.6.2](https://github.com/zmartzone/cjose/compare/0.6.1...v0.6.2)  (2022-04-14)
 
 ### Update
 

@@ -55,3 +55,4 @@ test/*.trs
 # Deliverables
 cjose-*.tar.gz
 dist/
+/configure~
