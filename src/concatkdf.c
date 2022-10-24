@@ -135,17 +135,19 @@ uint8_t *cjose_concatkdf_derive(const size_t keylen,
         uint8_t counter[4];
         _apply_uint32(idx, counter);
 
-        uint8_t *hash = STACK_ALLOC(hashlen * sizeof(uint8_t));
+        uint8_t *hash = cjose_get_alloc()(hashlen * sizeof(uint8_t));
         if (1 != EVP_DigestInit_ex(ctx, dgst, NULL) || 1 != EVP_DigestUpdate(ctx, counter, sizeof(counter))
             || 1 != EVP_DigestUpdate(ctx, ikm, ikmLen) || 1 != EVP_DigestUpdate(ctx, otherinfo, otherinfoLen)
             || 1 != EVP_DigestFinal_ex(ctx, hash, NULL))
         {
+        	cjose_get_dealloc()(hash);
             CJOSE_ERROR(err, CJOSE_ERR_CRYPTO);
             goto concatkdf_derive_finish;
         }
 
         uint8_t *ptr = buffer + offset;
         memcpy(ptr, hash, min_len(hashlen, amt));
+    	cjose_get_dealloc()(hash);
         offset += hashlen;
         amt -= hashlen;
     }

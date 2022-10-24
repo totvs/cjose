@@ -20,5 +20,7 @@ jobs:
     - name: Test
       run: make check
     - name: Valgrind
+      env:
+        CK_FORK: no
       run: |
         valgrind --leak-check=full --error-exitcode=1 --show-possibly-lost=no --read-inline-info=yes --keep-debuginfo=yes --undef-value-errors=no ./test/check_cjose
