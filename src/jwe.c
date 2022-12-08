@@ -14,7 +14,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 #include <openssl/rand.h>
 #include <openssl/rsa.h>
 #include <openssl/evp.h>

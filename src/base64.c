@@ -11,7 +11,6 @@
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
-#include <assert.h>
 
 // defines
 #define B64_BYTE1(ptr) (((*ptr) & 0xfc) >> 2)
@@ -125,8 +124,10 @@ static inline bool _decode(const char *input, size_t inlen, uint8_t **output, si
         }
     }
 
-    assert(shift != 1);
-    assert(shift != 4);
+    if ((shift == 1) || (shift == 4)) {
+        CJOSE_ERROR(err, CJOSE_ERR_INVALID_STATE);
+        goto b64_decode_failed;
+    }
 
     if (shift == 3)
     {
@@ -141,7 +142,12 @@ static inline bool _decode(const char *input, size_t inlen, uint8_t **output, si
 
     *output = buffer;
     *outlen = pos;
-    assert(*outlen <= rlen);
+
+    if (*outlen > rlen) {
+        CJOSE_ERROR(err, CJOSE_ERR_INVALID_STATE);
+        goto b64_decode_failed;
+    }
+
     return true;
 
 b64_decode_failed:

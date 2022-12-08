@@ -1,5 +1,7 @@
 # Release Notes #
 
+* avoid use of assert (https://github.com/cisco/cjose/issues/123) ; thanks @groovyfeng 
+
 <a name="v0.6.2.1"></a>
 ## [v0.6.2.1](https://github.com/zmartzone/cjose/compare/v0.6.2...v0.6.2.1)  (2022-10-24)
 * preserve key order in cjose_header_get_raw as well (https://github.com/zmartzone/cjose/pull/16)
