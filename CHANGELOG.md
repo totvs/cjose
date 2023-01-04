@@ -1,6 +1,7 @@
 # Release Notes #
 
 * avoid use of assert (https://github.com/cisco/cjose/issues/123) ; thanks @groovyfeng 
+* fix make on srcdir != builddir (https://github.com/zmartzone/cjose/pull/17) ; thanks @fd00
 
 <a name="v0.6.2.1"></a>
 ## [v0.6.2.1](https://github.com/zmartzone/cjose/compare/v0.6.2...v0.6.2.1)  (2022-10-24)

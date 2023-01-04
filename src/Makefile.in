@@ -265,6 +265,7 @@ EGREP = @EGREP@
 ETAGS = @ETAGS@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
+FILECMD = @FILECMD@
 GREP = @GREP@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -361,7 +362,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AM_CFLAGS = -std=gnu99 --pedantic -Wall -Werror -g -O2 -I$(top_builddir)/include
 lib_LTLIBRARIES = libcjose.la
-libcjose_la_CPPFLAGS = -I$(topdir)/include
+libcjose_la_CPPFLAGS = -I$(top_srcdir)/include
 libcjose_la_LDFLAGS = -lm
 libcjose_la_SOURCES = version.c \
 					util.c \
