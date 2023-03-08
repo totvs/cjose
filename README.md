@@ -1,6 +1,6 @@
-[![Build Status](https://github.com/zmartzone/cjose/actions/workflows/build.yml/badge.svg)](https://github.com/zmartzone/cjose/actions/workflows/build.yml)
-[![Architectures Status](https://github.com/zmartzone/cjose/actions/workflows/archs.yml/badge.svg)](https://github.com/zmartzone/cjose/actions/workflows/archs.yml)
-[![CodeQL Analysis](https://github.com/zmartzone/cjose/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/zmartzone/cjose/actions/workflows/codeql-analysis.yml)
+[![Build Status](https://github.com/OpenIDC/cjose/actions/workflows/build.yml/badge.svg)](https://github.com/OpenIDC/cjose/actions/workflows/build.yml)
+[![Architectures Status](https://github.com/OpenIDC/cjose/actions/workflows/archs.yml/badge.svg)](https://github.com/OpenIDC/cjose/actions/workflows/archs.yml)
+[![CodeQL Analysis](https://github.com/OpenIDC/cjose/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/OpenIDC/cjose/actions/workflows/codeql-analysis.yml)
 
 # cjose #
 
