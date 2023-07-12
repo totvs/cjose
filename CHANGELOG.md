@@ -1,7 +1,10 @@
 # Release Notes #
 
+<a name="v0.6.2.2"></a>
+## [v0.6.2.2](https://github.com/OpenIDC/cjose/compare/v0.6.2.1...v0.6.2.2)  (2023-07-12)
+* use fixed authentication tag length of 16 octets in AES GCM decryption (https://github.com/cisco/cjose/issues/125)
 * avoid use of assert (https://github.com/cisco/cjose/issues/123) ; thanks @groovyfeng 
-* fix make on srcdir != builddir (https://github.com/zmartzone/cjose/pull/17) ; thanks @fd00
+* fix make on srcdir != builddir (https://github.com/OpenIDC/cjose/pull/17) ; thanks @fd00
 
 <a name="v0.6.2.1"></a>
 ## [v0.6.2.1](https://github.com/zmartzone/cjose/compare/v0.6.2...v0.6.2.1)  (2022-10-24)
