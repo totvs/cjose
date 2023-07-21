@@ -1423,7 +1423,7 @@ START_TEST(test_cjose_jwk_get_and_set_kid)
 }
 END_TEST
 
-Suite *cjose_jwk_suite()
+Suite *cjose_jwk_suite(void)
 {
     Suite *suite = suite_create("jwk");
 

@@ -1,5 +1,7 @@
 # Release Notes #
 
+* avoid using empty prototypes; support Clang 15 and XCode 14.3
+
 <a name="v0.6.2.2"></a>
 ## [v0.6.2.2](https://github.com/OpenIDC/cjose/compare/v0.6.2.1...v0.6.2.2)  (2023-07-12)
 * use fixed authentication tag length of 16 octets in AES GCM decryption (https://github.com/cisco/cjose/issues/125)
