@@ -1416,7 +1416,7 @@ START_TEST(test_cjose_jwe_multiple_recipients)
 }
 END_TEST
 
-Suite *cjose_jwe_suite()
+Suite *cjose_jwe_suite(void)
 {
     Suite *suite = suite_create("jwe");
 
