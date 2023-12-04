@@ -1285,6 +1285,139 @@ static const char *_get_json_object_string_attribute(json_t *json, const char *k
 }
 
 /**
+ * Internal helper function to check if a given attribute in a JSON object
+ * is a valid base64 encoded string. This function is used to verify the
+ * format of base64 strings, typically used in contexts where base64 encoding
+ * is expected, such as in JWKs (JSON Web Keys).
+ *
+ * This function checks that all characters in the string are part of the
+ * base64 alphabet and that any padding characters ('=') are correctly
+ * positioned at the end of the string. It returns true if the string is
+ * either not present, empty, or a valid base64 string.
+ *
+ * Note: This function does not perform actual decoding of the base64 string,
+ * but only validates its format.
+ *
+ * \param[in]  jwk_json The JSON object containing the attribute to be verified.
+ * \param[in]  key The key corresponding to the attribute in the JSON object.
+ * \param[out] err Structure for reporting any error encountered during the
+ *                process of retrieving the string value from the JSON object.
+ *
+ * \returns true if the attribute is a valid base64 string or not present/empty;
+ *          false if the string is present but not a valid base64 string.
+ */
+static bool
+is_base64(json_t *jwk_json, const char *key, cjose_err *err)
+{
+    // Function implementation...
+    static const char *ALPHABET_B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+    // get the base64 encoded string value of the attribute (if any)
+    const char *str = _get_json_object_string_attribute(jwk_json, key, err);
+    if (str == NULL)
+    {
+        // Attribute not found or an error occurred
+        return false;
+    }
+
+    size_t len = strlen(str);
+    size_t padding = 0;
+
+    // Check if the string has padding and count padding characters
+    for (size_t i = len; i-- > 0;)
+    {
+        if (str[i] == '=')
+        {
+            padding++;
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    // More than 2 padding characters is invalid
+    if (padding > 2)
+    {
+        return false;
+    }
+
+    // Check each character to ensure it is a valid base64 character
+    for (size_t i = 0; i < len - padding; ++i)
+    {
+        if (strchr(ALPHABET_B64, str[i]) == NULL)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/**
+ * Internal helper function for extracing an octet string from a base64
+ * encoded field.  Caller provides the json object, the attribute key,
+ * and an expected length for the octet string.  On successful decoding,
+ * this will return a newly allocated buffer with the decoded octet string
+ * of the expected length.
+ *
+ * Note: caller is responsible for freeing the buffer returned by this function.
+ *
+ * \param[in]     json the JSON object from which to read the attribute.
+ * \param[in]     key the name of the attribute to be decoded.
+ * \param[out]    pointer to buffer of octet string (if decoding succeeds).
+ * \param[in/out] in as the expected length of the attribute, out as the
+ *                actual decoded length.  Note, this method succeeds only
+ *                if the actual decoded length matches the expected length.
+ *                If the in-value is 0 this indicates there is no particular
+ *                expected length (i.e. any length is ok).
+ * \returns true  if attribute is either not present or successfully decoded.
+ *                false otherwise.
+ */
+static bool
+_decode_json_object_base64_attribute(json_t *jwk_json, const char *key, uint8_t **buffer, size_t *buflen, cjose_err *err)
+{
+    // get the base64url encoded string value of the attribute (if any)
+    const char *str = _get_json_object_string_attribute(jwk_json, key, err);
+    if (str == NULL || strlen(str) == 0)
+    {
+        *buflen = 0;
+        *buffer = NULL;
+        return true;
+    }
+
+
+    // if a particular decoded length is expected, check for that
+    if (*buflen != 0)
+    {
+        // with base64, the encoded length is approximately 4/3 of the decoded length
+        size_t expected_len = (4 * (*buflen + 2)) / 3;
+
+        // adjust for padding
+        size_t padding = (4 - (expected_len % 4)) % 4;
+        expected_len += padding;
+
+        if (expected_len != strlen(str))
+        {
+            CJOSE_ERROR(err, CJOSE_ERR_INVALID_ARG);
+            *buflen = 0;
+            *buffer = NULL;
+            return false;
+        }
+    }
+
+    // decode the base64 encoded string to the allocated buffer
+    if (!cjose_base64_decode(str, strlen(str), buffer, buflen, err))
+    {
+        *buflen = 0;
+        *buffer = NULL;
+        return false;
+    }
+
+    return true;
+}
+
+/**
  * Internal helper function for extracing an octet string from a base64url
  * encoded field.  Caller provides the json object, the attribute key,
  * and an expected length for the octet string.  On successful decoding,
@@ -1323,7 +1456,7 @@ _decode_json_object_base64url_attribute(json_t *jwk_json, const char *key, uint8
         for (end = str + strlen(str) - 1; *end == '=' && end > str; --end)
             ;
         size_t unpadded_len = end + 1 - str - ((*end == '=') ? 1 : 0);
-        size_t expected_len = ceil(4 * ((float)*buflen / 3));
+        size_t expected_len = (size_t)ceil(4.0f * ((float)*buflen / 3));
 
         if (expected_len != unpadded_len)
         {
@@ -1437,10 +1570,20 @@ static cjose_jwk_t *_cjose_jwk_import_RSA(json_t *jwk_json, cjose_err *err)
 
     // get the decoded value of n (buflen = 0 means no particular expected len)
     size_t n_buflen = 0;
-    if (!_decode_json_object_base64url_attribute(jwk_json, CJOSE_JWK_N_STR, &n_buffer, &n_buflen, err))
+    if (is_base64(jwk_json, CJOSE_JWK_N_STR, err))
     {
-        CJOSE_ERROR(err, CJOSE_ERR_INVALID_ARG);
-        goto import_RSA_cleanup;
+      if (!_decode_json_object_base64_attribute(jwk_json, CJOSE_JWK_N_STR, &n_buffer, &n_buflen, err))
+      {
+          CJOSE_ERROR(err, CJOSE_ERR_INVALID_ARG);
+          goto import_RSA_cleanup;
+      }
+    }else
+    {
+      if (!_decode_json_object_base64url_attribute(jwk_json, CJOSE_JWK_N_STR, &n_buffer, &n_buflen, err))
+      {
+          CJOSE_ERROR(err, CJOSE_ERR_INVALID_ARG);
+          goto import_RSA_cleanup;
+      }
     }
 
     // get the decoded value of e
