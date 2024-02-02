@@ -15,6 +15,7 @@
 #include <alloca.h>
 #endif
 #include <openssl/evp.h>
+#include <openssl/opensslv.h>
 #include <string.h>
 #include <cjose/base64.h>
 #include <cjose/util.h>
@@ -113,7 +114,17 @@ uint8_t *cjose_concatkdf_derive(const size_t keylen,
 
     uint8_t *buffer = NULL;
     const EVP_MD *dgst = EVP_sha256();
-    EVP_MD_CTX *ctx = EVP_MD_CTX_create();
+    EVP_MD_CTX *ctx = NULL;
+#define XSTR(x) STR(x)
+#define STR(x) #x
+#pragma message ("OPENSSL_VERSION_NUMBER: " XSTR(OPENSSL_VERSION_NUMBER))
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+#pragma message ("version < 1.1.0")
+    ctx = EVP_MD_CTX_create();
+#else
+#pragma message ("version > 1.1.0")
+    ctx = EVP_MD_CTX_new();
+#endif
     if (NULL == ctx)
     {
         CJOSE_ERROR(err, CJOSE_ERR_NO_MEMORY);
@@ -156,7 +167,11 @@ uint8_t *cjose_concatkdf_derive(const size_t keylen,
     buffer = NULL;
 
 concatkdf_derive_finish:
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     EVP_MD_CTX_destroy(ctx);
+#else
+    EVP_MD_CTX_free(ctx);
+#endif
     cjose_get_dealloc()(buffer);
 
     return derived;

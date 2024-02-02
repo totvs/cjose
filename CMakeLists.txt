@@ -114,14 +114,13 @@ if (MSVC)
    else()
       SET(LIB_COMPILER_OPTIONS ${LIB_COMPILER_OPTIONS} $<$<CONFIG:Debug>:/MDd> $<$<CONFIG:Release>:/MD>)
    endif()
-elseif(CMAKE_COMPILER_IS_GNUCC)
-	add_definitions( "-DVERSION=\"${PACKAGE_VERSION}\"")
-    set(DEFAULT_COMPILER_OPTIONS -std=gnu99 -g $<$<CONFIG:Release>:-O2>)
-	set(LIB_COMPILER_OPTIONS ${DEFAULT_COMPILER_OPTIONS} --pedantic -Wall -Werror)
-else(CMAKE_C_COMPILER_ID MATCHES "AppleClang")
-	add_definitions( "-DVERSION=\"${PACKAGE_VERSION}\"")
-    set(DEFAULT_COMPILER_OPTIONS -std=gnu99 -g $<$<CONFIG:Release>:-O2>)
-	set(LIB_COMPILER_OPTIONS ${DEFAULT_COMPILER_OPTIONS} --pedantic -Wall -Werror)
+elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
+    if(CMAKE_BUILD_TYPE MATCHES Debug)
+      set(DEFAULT_COMPILER_OPTIONS -g -O0 -fPIC)
+    elseif(CMAKE_BUILD_TYPE MATCHES Release)
+     set(DEFAULT_COMPILER_OPTIONS -O3 -fPIC)
+    endif()
+    set(LIB_COMPILER_OPTIONS ${DEFAULT_COMPILER_OPTIONS} --pedantic -Wall -Werror)
 endif(MSVC)
 
 
@@ -134,17 +133,17 @@ source_group("Library Private Headers" FILES ${CJOSE_HDR_PRIVATE})
 source_group("Library Public Headers" FILES ${CJOSE_HDR_PUBLIC})
 
 if (CJOSE_BUILD_SHARED_LIBS)
-add_library(cjose SHARED 
-${CJOSE_SRC}
-${CJOSE_HDR_PRIVATE}
-${CJOSE_HDR_PUBLIC}
-)
+    add_library(cjose SHARED
+      ${CJOSE_SRC}
+      ${CJOSE_HDR_PRIVATE}
+      ${CJOSE_HDR_PUBLIC}
+    )
 else()
-add_library(cjose 
-${CJOSE_SRC}
-${CJOSE_HDR_PRIVATE}
-${CJOSE_HDR_PUBLIC}
-)
+    add_library(cjose
+      ${CJOSE_SRC}
+      ${CJOSE_HDR_PRIVATE}
+      ${CJOSE_HDR_PUBLIC}
+    )
 endif()
 
 message(">>>>> ${OPENSSL_LIBRARIES} <<<<<")
