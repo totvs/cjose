@@ -618,7 +618,8 @@ static bool _cjose_jws_build_cser(cjose_jws_t *jws, cjose_err *err)
     // compute length of compact serialization
     jws->cser_len = jws->hdr_b64u_len + jws->dat_b64u_len + jws->sig_b64u_len + 3;
 
-    if (NULL != jws->cser) {
+    if (NULL != jws->cser)
+    {
         CJOSE_ERROR(err, CJOSE_ERR_INVALID_STATE);
         return false;
     }

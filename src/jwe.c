@@ -45,9 +45,11 @@ _cjose_jwe_encrypt_ek_rsa_oaep(_jwe_int_recipient_t *recipient, cjose_jwe_t *jwe
 static bool
 _cjose_jwe_decrypt_ek_rsa_oaep(_jwe_int_recipient_t *recipient, cjose_jwe_t *jwe, const cjose_jwk_t *jwk, cjose_err *err);
 
+#ifdef HAVE_RSA_PKCS1_PADDING
 static bool _cjose_jwe_encrypt_ek_rsa1_5(_jwe_int_recipient_t *recipient, cjose_jwe_t *jwe, const cjose_jwk_t *jwk, cjose_err *err);
 
 static bool _cjose_jwe_decrypt_ek_rsa1_5(_jwe_int_recipient_t *recipient, cjose_jwe_t *jwe, const cjose_jwk_t *jwk, cjose_err *err);
+#endif // HAVE_RSA_PKCS1_PADDING
 
 static bool
 _cjose_jwe_encrypt_ek_ecdh_es(_jwe_int_recipient_t *recipient, cjose_jwe_t *jwe, const cjose_jwk_t *jwk, cjose_err *err);
@@ -327,11 +329,14 @@ static bool _cjose_jwe_validate_alg(cjose_header_t *protected_header,
         recipient->fns.encrypt_ek = _cjose_jwe_encrypt_ek_rsa_oaep;
         recipient->fns.decrypt_ek = _cjose_jwe_decrypt_ek_rsa_oaep;
     }
+
+#ifdef HAVE_RSA_PKCS1_PADDING
     if (strcmp(alg, CJOSE_HDR_ALG_RSA1_5) == 0)
     {
         recipient->fns.encrypt_ek = _cjose_jwe_encrypt_ek_rsa1_5;
         recipient->fns.decrypt_ek = _cjose_jwe_decrypt_ek_rsa1_5;
     }
+#endif // HAVE_RSA_PKCS1_PADDING
     if (strcmp(alg, CJOSE_HDR_ALG_ECDH_ES) == 0)
     {
         if (is_multiple)
@@ -642,6 +647,15 @@ static bool _cjose_jwe_encrypt_ek_rsa_padding(
         return false;
     }
 
+#ifndef HAVE_RSA_PKCS1_PADDING
+    // prohibite RSA_PKCS1_PADDING because it is not safe
+    if (padding == RSA_PKCS1_PADDING)
+    {
+        CJOSE_ERROR(err, CJOSE_ERR_CRYPTO);
+        return false;
+    }
+#endif // HAVE_RSA_PKCS1_PADDING
+
     // encrypt the CEK using RSA v1.5 or OAEP padding
     if (RSA_public_encrypt(jwe->cek_len, jwe->cek, recipient->enc_key.raw, (RSA *)jwk->keydata, padding)
         != recipient->enc_key.raw_len)
@@ -687,6 +701,16 @@ static bool _cjose_jwe_decrypt_ek_rsa_padding(
         return false;
     }
 
+#ifndef HAVE_RSA_PKCS1_PADDING
+    // prohibite RSA_PKCS1_PADDING because implementation are often vulnerable
+    // See marvin attack
+    if (padding == RSA_PKCS1_PADDING)
+    {
+        CJOSE_ERROR(err, CJOSE_ERR_CRYPTO);
+        return false;
+    }
+#endif // HAVE_RSA_PKCS1_PADDING
+
     // decrypt the CEK using RSA v1.5 or OAEP padding
     int len = RSA_private_decrypt(recipient->enc_key.raw_len, recipient->enc_key.raw, jwe->cek, (RSA *)jwk->keydata, padding);
     if (-1 == len)
@@ -714,6 +738,7 @@ _cjose_jwe_decrypt_ek_rsa_oaep(_jwe_int_recipient_t *recipient, cjose_jwe_t *jwe
     return _cjose_jwe_decrypt_ek_rsa_padding(recipient, jwe, jwk, RSA_PKCS1_OAEP_PADDING, err);
 }
 
+#ifdef HAVE_RSA_PKCS1_PADDING
 ////////////////////////////////////////////////////////////////////////////////
 static bool _cjose_jwe_encrypt_ek_rsa1_5(_jwe_int_recipient_t *recipient, cjose_jwe_t *jwe, const cjose_jwk_t *jwk, cjose_err *err)
 {
@@ -725,6 +750,7 @@ static bool _cjose_jwe_decrypt_ek_rsa1_5(_jwe_int_recipient_t *recipient, cjose_
 {
     return _cjose_jwe_decrypt_ek_rsa_padding(recipient, jwe, jwk, RSA_PKCS1_PADDING, err);
 }
+#endif // HAVE_RSA_PKCS1_PADDING
 
 ////////////////////////////////////////////////////////////////////////////////
 static bool _cjose_jwe_encrypt_ek_ecdh_es(_jwe_int_recipient_t *recipient, cjose_jwe_t *jwe, const cjose_jwk_t *jwk, cjose_err *err)
@@ -784,6 +810,13 @@ static bool _cjose_jwe_encrypt_ek_ecdh_es(_jwe_int_recipient_t *recipient, cjose
 
     jwe->cek = derived;
     jwe->cek_len = keylen;
+
+    // empty string may have been allocated upon import
+    if (recipient->enc_key.raw != NULL)
+    {
+        cjose_get_dealloc()(recipient->enc_key.raw);
+    }
+
     recipient->enc_key.raw = NULL;
     recipient->enc_key.raw_len = 0;
     result = true;
@@ -856,6 +889,13 @@ static bool _cjose_jwe_decrypt_ek_ecdh_es(_jwe_int_recipient_t *recipient, cjose
 
     jwe->cek = derived;
     jwe->cek_len = keylen;
+
+    // empty string may have been allocated upon import
+    if (recipient->enc_key.raw != NULL)
+    {
+        cjose_get_dealloc()(recipient->enc_key.raw);
+    }
+
     recipient->enc_key.raw = NULL;
     recipient->enc_key.raw_len = 0;
     result = true;

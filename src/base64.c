@@ -124,7 +124,8 @@ static inline bool _decode(const char *input, size_t inlen, uint8_t **output, si
         }
     }
 
-    if ((shift == 1) || (shift == 4)) {
+    if ((shift == 1) || (shift == 4))
+    {
         CJOSE_ERROR(err, CJOSE_ERR_INVALID_STATE);
         goto b64_decode_failed;
     }
@@ -143,7 +144,8 @@ static inline bool _decode(const char *input, size_t inlen, uint8_t **output, si
     *output = buffer;
     *outlen = pos;
 
-    if (*outlen > rlen) {
+    if (*outlen > rlen)
+    {
         CJOSE_ERROR(err, CJOSE_ERR_INVALID_STATE);
         goto b64_decode_failed;
     }

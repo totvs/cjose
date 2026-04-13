@@ -19,13 +19,13 @@ Suite *cjose_header_suite(void);
 Suite *cjose_utils_suite(void);
 Suite *cjose_concatkdf_suite(void);
 
-#define _ck_assert_bin(X, OP, Y, LEN)                                                                                            \
-    do                                                                                                                           \
-    {                                                                                                                            \
-        const void *_chk_x = (X);                                                                                             \
-        const void *_chk_y = (Y);                                                                                             \
-        const unsigned int _chk_len = (LEN);                                                                                           \
-        ck_assert_msg(0 OP memcmp(_chk_x, _chk_y, _chk_len),                                                                     \
+#define _ck_assert_bin(X, OP, Y, LEN)                                                                                          \
+    do                                                                                                                         \
+    {                                                                                                                          \
+        const void *_chk_x = (X);                                                                                              \
+        const void *_chk_y = (Y);                                                                                              \
+        const unsigned int _chk_len = (LEN);                                                                                   \
+        ck_assert_msg(0 OP memcmp(_chk_x, _chk_y, _chk_len),                                                                   \
                       "Assertion '" #X #OP #Y "' failed: " #LEN "==%u, " #X "==0x%p, " #Y "==0x%p", _chk_len, _chk_x, _chk_y); \
     } while (0);
 

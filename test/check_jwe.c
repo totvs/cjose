@@ -210,19 +210,25 @@ static void _self_encrypt_self_decrypt(const char *plain1)
 {
     _self_encrypt_self_decrypt_with_key(CJOSE_HDR_ALG_RSA_OAEP, CJOSE_HDR_ENC_A128GCM, JWK_RSA, plain1);
 
+#ifdef HAVE_RSA_PKCS1_PADDING
     _self_encrypt_self_decrypt_with_key(CJOSE_HDR_ALG_RSA1_5, CJOSE_HDR_ENC_A128GCM, JWK_RSA, plain1);
+#endif
 
     _self_encrypt_self_decrypt_with_key(CJOSE_HDR_ALG_DIR, CJOSE_HDR_ENC_A128GCM, JWK_OCT_16, plain1);
 
     _self_encrypt_self_decrypt_with_key(CJOSE_HDR_ALG_RSA_OAEP, CJOSE_HDR_ENC_A192GCM, JWK_RSA, plain1);
 
+#ifdef HAVE_RSA_PKCS1_PADDING
     _self_encrypt_self_decrypt_with_key(CJOSE_HDR_ALG_RSA1_5, CJOSE_HDR_ENC_A192GCM, JWK_RSA, plain1);
+#endif
 
     _self_encrypt_self_decrypt_with_key(CJOSE_HDR_ALG_DIR, CJOSE_HDR_ENC_A192GCM, JWK_OCT_24, plain1);
 
     _self_encrypt_self_decrypt_with_key(CJOSE_HDR_ALG_RSA_OAEP, CJOSE_HDR_ENC_A256GCM, JWK_RSA, plain1);
 
+#ifdef HAVE_RSA_PKCS1_PADDING
     _self_encrypt_self_decrypt_with_key(CJOSE_HDR_ALG_RSA1_5, CJOSE_HDR_ENC_A256GCM, JWK_RSA, plain1);
+#endif
 
     _self_encrypt_self_decrypt_with_key(CJOSE_HDR_ALG_DIR, CJOSE_HDR_ENC_A256GCM, JWK_OCT_32, plain1);
 
@@ -358,7 +364,9 @@ static void _self_encrypt_self_decrypt_iv(const char *plain1)
 
     _self_encrypt_self_decrypt_with_key_iv(CJOSE_HDR_ALG_RSA_OAEP, CJOSE_HDR_ENC_A256GCM, JWK_RSA, 12, plain1);
 
+#ifdef HAVE_RSA_PKCS1_PADDING
     _self_encrypt_self_decrypt_with_key_iv(CJOSE_HDR_ALG_RSA1_5, CJOSE_HDR_ENC_A256GCM, JWK_RSA, 12, plain1);
+#endif
 
     _self_encrypt_self_decrypt_with_key_iv(CJOSE_HDR_ALG_DIR, CJOSE_HDR_ENC_A256GCM, JWK_OCT_32, 12, plain1);
 
@@ -973,7 +981,8 @@ START_TEST(test_cjose_jwe_decrypt_aes_gcm)
 
     const char *key = JWK_OCT_32;
     const char *plain1 = "Live long and prosper.";
-    char *compact1 = "eyJhbGciOiAiZGlyIiwgImVuYyI6ICJBMjU2R0NNIn0..Du_9fxxV-zrReaWC.aS_rpokeuxkaPc2sykcQDCQuJCYoww.GpeKGEqd8KQ0v6JNea5aSA";
+    char *compact1
+        = "eyJhbGciOiAiZGlyIiwgImVuYyI6ICJBMjU2R0NNIn0..Du_9fxxV-zrReaWC.aS_rpokeuxkaPc2sykcQDCQuJCYoww.GpeKGEqd8KQ0v6JNea5aSA";
     char *compact2 = "eyJhbGciOiAiZGlyIiwgImVuYyI6ICJBMjU2R0NNIn0..Du_9fxxV-zrReaWC.aS_rpokeuxkaPc2sykcQDCQuJCYoww.Gp";
 
     cjose_jwk_t *jwk = cjose_jwk_import(key, strlen(key), &err);
@@ -1007,17 +1016,17 @@ START_TEST(test_cjose_jwe_decrypt_aes_gcm)
 
     cjose_jwe_t *jwe2 = cjose_jwe_import(compact2, strlen(compact2), &err);
     ck_assert_msg(NULL != jwe2,
-                   "cjose_jwe_import failed: "
-                   "%s, file: %s, function: %s, line: %ld",
-                   err.message, err.file, err.function, err.line);
+                  "cjose_jwe_import failed: "
+                  "%s, file: %s, function: %s, line: %ld",
+                  err.message, err.file, err.function, err.line);
 
     uint8_t *plain3 = NULL;
     size_t plain3_len = 0;
     plain3 = cjose_jwe_decrypt(jwe2, jwk, &plain3_len, &err);
     ck_assert_msg(NULL == plain3,
-                   "cjose_jwe_decrypt succeeded where it should have failed: "
-                   "%s, file: %s, function: %s, line: %ld",
-                   err.message, err.file, err.function, err.line);
+                  "cjose_jwe_decrypt succeeded where it should have failed: "
+                  "%s, file: %s, function: %s, line: %ld",
+                  err.message, err.file, err.function, err.line);
 
     cjose_jwe_release(jwe2);
     cjose_jwk_release(jwk);
@@ -1081,6 +1090,7 @@ START_TEST(test_cjose_jwe_decrypt_rsa)
           "AlWAyLWybqq6t16VFd7hQd0y6flUK4SlOydB61gwanOsXGOAOv82cHq0E3"
           "eL4HrtZkUuKvnPrMnsUUFlfUdybVzxyjz9JF_XyaY14ardLSjf4L_FNY\" }" },
 
+#ifdef HAVE_RSA_PKCS1_PADDING
         // https://tools.ietf.org/html/rfc7516#appendix-A.2
         // JWE using RSAES-PKCS1-v1_5 and AES_128_CBC_HMAC_SHA_256
         { "eyJhbGciOiJSU0ExXzUiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0."
@@ -1125,6 +1135,7 @@ START_TEST(test_cjose_jwe_decrypt_rsa)
           "\"qi\":\"eNho5yRBEBxhGBtQRww9QirZsB66TrfFReG_CcteI1aCneT0ELGhYlRlC"
           "tUkTRclIfuEPmNsNDPbLoLqqCVznFbvdB7x-Tl-m0l_eFTj2KiqwGqE9PZ"
           "B9nNTwMVvH3VRRSLWACvPnSiwP8N5Usy-WRXS-V7TbpxIhvepTfE0NNo\" }" },
+#endif // HAVE_RSA_PKCS1_PADDING
 
         { NULL, NULL, NULL }
     };
@@ -1257,6 +1268,7 @@ static void _cjose_test_empty_headers(cjose_jwk_t *key)
 START_TEST(test_cjose_jwe_multiple_recipients)
 {
 
+#ifdef HAVE_RSA_PKCS1_PADDING
     char *rsa[] = { "{\"kty\":\"RSA\",\"e\":\"AQAB\",\"n\":\"pXldOFJS1PKXlkkkcCKtBt6efl84jkZinEzVF1HcksvO_b"
                     "QUFJbUPcZwyzKk8fYnGbu0LwnY3hhCSDk-Ki8S2h_8VOiR7AY2ptI_TjeGp0DDqSnmJEdDrwIbw0yGTgOHZ63xms0aE4"
                     "fv9tdrw5U4v_A3AfOwUtCyxuyZP_7WlNj0sMsWwiyp0BGvCUB4xuhVtsEsbSWvSAO8CYHEy3fVGZ6bLXh7DbF7WlbfZ9K"
@@ -1413,6 +1425,7 @@ START_TEST(test_cjose_jwe_multiple_recipients)
     }
 
     cjose_header_release(protected_header);
+#endif // HAVE_RSA_PKCS1_PADDING
 }
 END_TEST
 

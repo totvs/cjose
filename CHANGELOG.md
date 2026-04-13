@@ -1,5 +1,16 @@
 # Release Notes #
 
+<a name="v0.6.2.4"></a>
+## [v0.6.2.3](https://github.com/OpenIDC/cjose/compare/v0.6.2.3...v0.6.2.4)  (2025-06-12)
+* fix memory leak in ECDH-ES JWE encryption/decryption
+* fix rsa_q = NULL initialization in _RSA_private_fields
+* fix memory allocation check (typo) in jwk.c (https://github.com/OpenIDC/cjose/security/code-scanning/2)
+* fix gcc10 errors for -Werror=ignored-qualifiers and remove unused includes ((https://github.com/OpenIDC/cjose/pull/26); thanks @s-ymgch228
+* re-generate automake/autoconf files with automake v1.17 and libtool v2.5.4
+
+<a name="v0.6.2.3"></a>
+## [v0.6.2.3](https://github.com/OpenIDC/cjose/compare/v0.6.2.2...v0.6.2.3)  (2024-04-24)
+* disable RSA PKCS 1.5 by default ((https://github.com/OpenIDC/cjose/pull/22); thanks @thalman
 * avoid using empty prototypes; support Clang 15 and XCode 14.3
 * build shared library on Cygwin by adding -no-undefined to LDFLAGS
   (https://github.com/OpenIDC/cjose/pull/20); thanks @fd00

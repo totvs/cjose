@@ -9,22 +9,14 @@
 
 #ifdef _WIN32
 #include <Winsock2.h>
-#include <malloc.h>
 #else
 #include <arpa/inet.h>
-#include <alloca.h>
 #endif
 #include <openssl/evp.h>
 #include <openssl/opensslv.h>
 #include <string.h>
 #include <cjose/base64.h>
 #include <cjose/util.h>
-
-#ifdef _WIN32
-#define STACK_ALLOC _alloca
-#else
-#define STACK_ALLOC alloca
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 static uint8_t *_apply_uint32(const uint32_t value, uint8_t *buffer)
@@ -151,14 +143,14 @@ uint8_t *cjose_concatkdf_derive(const size_t keylen,
             || 1 != EVP_DigestUpdate(ctx, ikm, ikmLen) || 1 != EVP_DigestUpdate(ctx, otherinfo, otherinfoLen)
             || 1 != EVP_DigestFinal_ex(ctx, hash, NULL))
         {
-        	cjose_get_dealloc()(hash);
+            cjose_get_dealloc()(hash);
             CJOSE_ERROR(err, CJOSE_ERR_CRYPTO);
             goto concatkdf_derive_finish;
         }
 
         uint8_t *ptr = buffer + offset;
         memcpy(ptr, hash, min_len(hashlen, amt));
-    	cjose_get_dealloc()(hash);
+        cjose_get_dealloc()(hash);
         offset += hashlen;
         amt -= hashlen;
     }

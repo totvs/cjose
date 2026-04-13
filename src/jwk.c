@@ -189,7 +189,8 @@ bool cjose_jwk_release(cjose_jwk_t *jwk)
         jwk->kid = NULL;
 
         // assumes freefunc is set
-        if (NULL != jwk->fns->free_func) {
+        if (NULL != jwk->fns->free_func)
+        {
             jwk->fns->free_func(jwk);
         }
         jwk = NULL;
@@ -1001,7 +1002,7 @@ create_EC_cleanup:
     return jwk;
 }
 
-const cjose_jwk_ec_curve cjose_jwk_EC_get_curve(const cjose_jwk_t *jwk, cjose_err *err)
+cjose_jwk_ec_curve cjose_jwk_EC_get_curve(const cjose_jwk_t *jwk, cjose_err *err)
 {
     if (NULL == jwk || CJOSE_JWK_KTY_EC != cjose_jwk_get_kty(jwk, err))
     {
@@ -1127,7 +1128,7 @@ static bool _RSA_private_fields(const cjose_jwk_t *jwk, json_t *json, cjose_err 
     BIGNUM *rsa_n = NULL, *rsa_e = NULL, *rsa_d = NULL;
     _cjose_jwk_rsa_get(rsa, &rsa_n, &rsa_e, &rsa_d);
 
-    BIGNUM *rsa_p = NULL, *rsa_q;
+    BIGNUM *rsa_p = NULL, *rsa_q = NULL;
     _cjose_jwk_rsa_get_factors(rsa, &rsa_p, &rsa_q);
 
     BIGNUM *rsa_dmp1 = NULL, *rsa_dmq1 = NULL, *rsa_iqmp = NULL;
@@ -1815,7 +1816,7 @@ static bool _cjose_jwk_evp_key_from_ec_key(const cjose_jwk_t *jwk, EVP_PKEY **ke
 
     // create a blank EVP_PKEY
     *key = EVP_PKEY_new();
-    if (NULL == key)
+    if (NULL == *key)
     {
         CJOSE_ERROR(err, CJOSE_ERR_CRYPTO);
         goto _cjose_jwk_evp_key_from_ec_key_fail;
