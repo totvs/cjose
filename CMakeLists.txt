@@ -1,220 +1,142 @@
-cmake_minimum_required (VERSION 3.0.2)
-project (cjose)
+cmake_minimum_required(VERSION 3.15)
+# Version updated to reflect the latest autotools release (0.6.2.4)
+project(cjose VERSION 0.6.2.4 LANGUAGES C)
 
 include(CheckSymbolExists)
-include(CheckIncludeFile)
 include(CheckTypeSize) 
+include(CheckIncludeFile)
+include(GNUInstallDirs)
 
-option(ENABLE_Tests "Turn on Tests" ON)
-option(CJOSE_BUILD_SHARED_LIBS "Build shared libraries." OFF)
+# --- Build Options ---
+option(ENABLE_TESTS "Enable unit tests" OFF)
+option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
+option(ENABLE_RSA_PKCS1_5 "Enable risky RSA PKCS v1.5 padding" OFF)
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/CMakeModules")
-
-# Build Release by default
-if (NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)
-endif()
-
-# Setup cjose version
-set(CJOSE_MAJOR_VERSION 0)
-set(CJOSE_MINOR_VERSION 6)
-set(CJOSE_PATCH_VERSION 2)
-set(CJOSE_INCREMENT_VERSION 2)
-set(PACKAGE_VERSION ${CJOSE_MAJOR_VERSION}.${CJOSE_MINOR_VERSION}.${CJOSE_PATCH_VERSION}.${CJOSE_INCREMENT_VERSION})
-  
-# Set output directories
+# --- Output Directories ---
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 
-# Create version.h file
-configure_file (
-  "${PROJECT_SOURCE_DIR}/include/cjose/version.h.in"
-  "${PROJECT_BINARY_DIR}/include/cjose/version.h"
-  )
-
-# Set include directories  
-include_directories(
-${CMAKE_CURRENT_SOURCE_DIR}/include
-${CMAKE_CURRENT_SOURCE_DIR}/src/include
-${CMAKE_CURRENT_SOURCE_DIR}/src
-${CMAKE_CURRENT_BINARY_DIR}/include
+# Generate version header
+configure_file(
+    "${PROJECT_SOURCE_DIR}/include/cjose/version.h.in"
+    "${PROJECT_BINARY_DIR}/include/cjose/version.h"
 )
 
-# Find dependencies
-# Look for Homebrew version of OpenSSL
-function(GetRootDirForHomebrew PKG_NAME)
-    if ((NOT ${PKG_NAME}_INCLUDE_DIR) OR (NOT ${PKG_NAME}_LIBRARIES))
-        string(TOLOWER ${PKG_NAME} PKG_NAME_LOWER)
-        SET(BREW_PACKAGE_DIR /usr/local/Cellar/${PKG_NAME_LOWER})
-        IF (EXISTS ${BREW_PACKAGE_DIR})
-            file(GLOB HB_${PKG_NAME}_ROOT_DIRECTORIES ${BREW_PACKAGE_DIR}/*)
-            list(GET HB_${PKG_NAME}_ROOT_DIRECTORIES 0 HB_${PKG_NAME}_ROOT_DIR)
-            if(HB_${PKG_NAME}_ROOT_DIRECTORIES AND NOT ${PKG_NAME}_ROOT_DIR)
-                SET(${PKG_NAME}_ROOT_DIR ${HB_${PKG_NAME}_ROOT_DIR} PARENT_SCOPE)
-            endif(HB_${PKG_NAME}_ROOT_DIRECTORIES AND NOT ${PKG_NAME}_ROOT_DIR)
-        ENDIF (EXISTS ${BREW_PACKAGE_DIR})
-    endif((NOT ${PKG_NAME}_INCLUDE_DIR) OR (NOT ${PKG_NAME}_LIBRARIES))
-endfunction(GetRootDirForHomebrew PKG_NAME)
+# --- Flexible Dependency Resolution ---
 
-if(CMAKE_C_COMPILER_ID MATCHES "AppleClang")
-    GetRootDirForHomebrew(OPENSSL)
-    if (ENABLE_Tests)
-        GetRootDirForHomebrew(CHECK)
+# OpenSSL
+if(OPENSSL_INCLUDE_DIR AND OPENSSL_LIBRARIES)
+    message(STATUS "CJOSE: Using manually provided OpenSSL paths.")
+else()
+    # If OPENSSL_ROOT_DIR is provided, find_package will use it as a hint
+    find_package(OpenSSL 1.0.1 REQUIRED)
+    set(OPENSSL_LIBRARIES OpenSSL::Crypto)
+endif()
+
+# Jansson (Required dependency)
+if(JANSSON_INCLUDE_DIR AND JANSSON_LIBRARIES)
+    message(STATUS "CJOSE: Using manually provided Jansson paths.")
+else()
+    # Try finding via system or JANSSON_ROOT_DIR
+    find_package(Jansson QUIET)
+    if(NOT JANSSON_FOUND)
+        find_path(JANSSON_INCLUDE_DIR NAMES jansson.h PATHS ${JANSSON_ROOT_DIR}/include)
+        find_library(JANSSON_LIBRARIES NAMES jansson PATHS ${JANSSON_ROOT_DIR}/lib)
     endif()
-    GetRootDirForHomebrew(JANSSON)
-endif(CMAKE_C_COMPILER_ID MATCHES "AppleClang")
+endif()
 
-find_package(Check 0.9.4)
+if(NOT JANSSON_LIBRARIES OR NOT JANSSON_INCLUDE_DIR)
+    message(FATAL_ERROR "Jansson not found. Use -DJANSSON_ROOT_DIR or provide full paths.")
+endif()
 
-find_library(RT NAMES rt)
-if (${RT} STREQUAL RT-NOTFOUND)
-	unset(${RT})
-endif(${RT} STREQUAL RT-NOTFOUND)
+# Check (Only if tests are enabled)
+if(ENABLE_TESTS)
+    find_package(Check 0.9.4 REQUIRED)
+endif()
 
-find_library(M NAMES m)
-if (${M} STREQUAL M-NOTFOUND)
-	unset(${M})
-endif(${M} STREQUAL M-NOTFOUND)
-
+# --- System Checks (Autotools parity) ---
 check_type_size(ssize_t SSIZE_T)
+check_symbol_exists("random" stdlib.h HAVE_RANDOM)
 
-# Enable test if possible
-if (NOT CHECK_FOUND OR ENABLE_Tests==OFF)
-	SET(ENABLE_Tests OFF)
-endif(NOT CHECK_FOUND OR ENABLE_Tests==OFF)
-message(STATUS "Tests Enabled............${ENABLE_Tests}")
+# Check for openssl/fec.h as done in the original configure script
+set(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
+check_include_file("openssl/fec.h" HAVE_OPENSSL_FEC_H)
 
-CHECK_SYMBOL_EXISTS("random" stdlib.h HAVE_RANDOM)
+# --- Library Target Definition ---
+file(GLOB CJOSE_SRC "${PROJECT_SOURCE_DIR}/src/*.c")
+file(GLOB CJOSE_HDR_PUBLIC "${PROJECT_SOURCE_DIR}/include/cjose/*.h")
+file(GLOB CJOSE_HDR_PRIVATE "${PROJECT_SOURCE_DIR}/src/include/*.h")
 
-# Set dependency include directories
-include_directories(
-  ${OPENSSL_INCLUDE_DIR}
-  ${JANSSON_INCLUDE_DIR}
-  ${BUILD_INCLUDES}
+add_library(cjose ${CJOSE_SRC} ${CJOSE_HDR_PRIVATE} ${CJOSE_HDR_PUBLIC})
+
+# Modern scope-based include directories
+target_include_directories(cjose 
+    PUBLIC 
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+        ${OPENSSL_INCLUDE_DIR}
+        ${JANSSON_INCLUDE_DIR}
 )
 
-message(">>>>> ${OPENSSL_INCLUDE_DIR} <<<<<")
+target_link_libraries(cjose PRIVATE ${OPENSSL_LIBRARIES} ${JANSSON_LIBRARIES})
 
-#Generate config file
-#configure_file (
-#  "${PROJECT_SOURCE_DIR}/include/cjose/config.h.in"
-#  "${PROJECT_BINARY_DIR}/include/cjose/cjose_config.h"
-#)
-
-# Setup compilation flags for different compilers
-if (MSVC)
-   add_compile_options(/W2  /nologo /WX-)
-   add_definitions( "/DVERSION=\"${PACKAGE_VERSION}\"")
-   add_definitions( "/D_CRT_SECURE_NO_WARNINGS")
-   set(DEFAULT_COMPILER_OPTIONS /Zi /DEBUG $<$<CONFIG:Debug>:/Od> $<$<CONFIG:Release>:/O2> /MP )
-   set(LIB_COMPILER_OPTIONS ${DEFAULT_COMPILER_OPTIONS} /WX)
-   if (STATIC_CRT)
-      SET(LIB_COMPILER_OPTIONS ${LIB_COMPILER_OPTIONS} $<$<CONFIG:Debug>:/MTd> $<$<CONFIG:Release>:/MT>)
-   else()
-      SET(LIB_COMPILER_OPTIONS ${LIB_COMPILER_OPTIONS} $<$<CONFIG:Debug>:/MDd> $<$<CONFIG:Release>:/MD>)
-   endif()
-elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
-    if(CMAKE_BUILD_TYPE MATCHES Debug)
-      set(DEFAULT_COMPILER_OPTIONS -g -O0 -fPIC)
-    elseif(CMAKE_BUILD_TYPE MATCHES Release)
-     set(DEFAULT_COMPILER_OPTIONS -O3 -fPIC)
+# Extra libraries for Unix environments
+if(UNIX)
+    find_library(M_LIB m)
+    if(M_LIB)
+        target_link_libraries(cjose PRIVATE ${M_LIB})
     endif()
-    set(LIB_COMPILER_OPTIONS ${DEFAULT_COMPILER_OPTIONS} --pedantic -Wall -Werror)
-endif(MSVC)
-
-
-file(GLOB CJOSE_SRC ${PROJECT_SOURCE_DIR}/src/*.c)
-file(GLOB CJOSE_HDR_PUBLIC ${PROJECT_SOURCE_DIR}/include/cjose/*.h)
-file(GLOB CJOSE_HDR_PRIVATE ${PROJECT_SOURCE_DIR}/src/include/*.h)
-
-source_group("Library Sources" FILES ${CJOSE_SRC})
-source_group("Library Private Headers" FILES ${CJOSE_HDR_PRIVATE})
-source_group("Library Public Headers" FILES ${CJOSE_HDR_PUBLIC})
-
-if (CJOSE_BUILD_SHARED_LIBS)
-    add_library(cjose SHARED
-      ${CJOSE_SRC}
-      ${CJOSE_HDR_PRIVATE}
-      ${CJOSE_HDR_PUBLIC}
-    )
-else()
-    add_library(cjose
-      ${CJOSE_SRC}
-      ${CJOSE_HDR_PRIVATE}
-      ${CJOSE_HDR_PUBLIC}
-    )
 endif()
 
-message(">>>>> ${OPENSSL_LIBRARIES} <<<<<")
-
-target_link_libraries(cjose ${JANSSON_LIBRARIES} ${OPENSSL_LIBRARIES} ${MLIB} ${RTLIB})
-target_compile_options(cjose PRIVATE ${LIB_COMPILER_OPTIONS})
-
-if (ENABLE_Tests)
-file(GLOB CJOSE_TESTS_SRC ${PROJECT_SOURCE_DIR}/test/*.c)
-file(GLOB CJOSE_TESTS_HDR ${PROJECT_SOURCE_DIR}/test/*.h)
-include_directories(${CHECK_INCLUDE_DIRS})
-source_group("Test Files " FILES ${CJOSE_TESTS_SRC} ${CJOSE_TESTS_HDR})
-
-add_executable(tests ${CJOSE_TESTS_SRC} ${CJOSE_TESTS_HDR})
-target_compile_options(tests PRIVATE ${DEFAULT_COMPILER_OPTIONS})
-target_link_libraries(tests cjose ${JANSSON_LIBRARIES} ${OPENSSL_LIBRARIES} ${CHECK_LIBRARIES})
-endif(ENABLE_Tests)
-
-#install
-
-# Allow the user to override installation directories.
-set(CJOSE_INSTALL_LIB_DIR       lib CACHE PATH "Installation directory for libraries")
-set(CJOSE_INSTALL_BIN_DIR       bin CACHE PATH "Installation directory for executables")
-set(CJOSE_INSTALL_INCLUDE_DIR   include CACHE PATH "Installation directory for header files")
-
-
-if(WIN32 AND NOT CYGWIN)
-  set(DEF_INSTALL_CMAKE_DIR cmake)
+# --- Compiler Flags and Definitions ---
+if(MSVC)
+    target_compile_options(cjose PRIVATE /W2 /WX /nologo /MP)
+    target_compile_definitions(cjose PRIVATE VERSION="${PROJECT_VERSION}" _CRT_SECURE_NO_WARNINGS)
 else()
-  set(DEF_INSTALL_CMAKE_DIR lib/cmake/cjose)
+    target_compile_options(cjose PRIVATE -Wall -Werror --pedantic)
 endif()
 
-set(CJOSE_INSTALL_CMAKE_DIR ${DEF_INSTALL_CMAKE_DIR} CACHE PATH "Installation directory for CMake files")
+if(HAVE_OPENSSL_FEC_H)
+    target_compile_definitions(cjose PRIVATE HAVE_OPENSSL_FEC_H=1)
+endif()
 
-# Create pkg-conf file.
-# (We use the same files as ./configure does, so we
-#  have to defined the same variables used there).
-set(prefix      ${CMAKE_INSTALL_PREFIX})
-set(exec_prefix ${CMAKE_INSTALL_PREFIX})
-set(libdir      ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
-set(includedir  ${CMAKE_INSTALL_PREFIX}/${CJOSE_INSTALL_INCLUDE_DIR})
-set(VERSION     ${PACKAGE_VERSION})
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cjose.pc.in
-               ${CMAKE_CURRENT_BINARY_DIR}/cjose.pc @ONLY)
-			   
-# Make sure the paths are absolute.
-foreach(p LIB BIN INCLUDE CMAKE)
-    set(var CJOSE_INSTALL_${p}_DIR)
-    if(NOT IS_ABSOLUTE "${${var}}")
-        set(${var} "${CMAKE_INSTALL_PREFIX}/${${var}}")
-    endif()
-endforeach()
+if(ENABLE_RSA_PKCS1_5)
+    target_compile_definitions(cjose PRIVATE HAVE_RSA_PKCS1_PADDING=1)
+endif()
 
+# --- Unit Tests ---
+if(ENABLE_TESTS)
+    file(GLOB CJOSE_TESTS_SRC "${PROJECT_SOURCE_DIR}/test/*.c")
+    add_executable(cjose_tests ${CJOSE_TESTS_SRC})
+    target_link_libraries(cjose_tests PRIVATE cjose ${CHECK_LIBRARIES} ${OPENSSL_LIBRARIES} ${JANSSON_LIBRARIES})
+    enable_testing()
+    add_test(NAME unit_tests COMMAND cjose_tests)
+endif()
+
+# --- Installation and Export ---
 set_target_properties(cjose PROPERTIES PUBLIC_HEADER "${CJOSE_HDR_PUBLIC}")
 
-
-# Install the pkg-config.
-install (FILES 
-         ${CMAKE_CURRENT_BINARY_DIR}/cjose.pc
-         DESTINATION ${CJOSE_INSTALL_LIB_DIR}/pkgconfig COMPONENT dev)
-		 
 install(TARGETS cjose
-        EXPORT CjoseTargets
-        LIBRARY DESTINATION "${CJOSE_INSTALL_LIB_DIR}" COMPONENT lib
-        ARCHIVE DESTINATION "${CJOSE_INSTALL_LIB_DIR}" COMPONENT lib
-        RUNTIME DESTINATION "${CJOSE_INSTALL_BIN_DIR}" COMPONENT lib # Windows DLLs
-        PUBLIC_HEADER DESTINATION "${CJOSE_INSTALL_INCLUDE_DIR}/cjose" COMPONENT dev)
+    EXPORT CjoseTargets
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT lib
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT lib
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT lib
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/cjose COMPONENT dev
+)
 
-# Install exports for the install-tree.
-install(EXPORT CjoseTargets 
-        DESTINATION "${CJOSE_INSTALL_CMAKE_DIR}" COMPONENT dev)
+install(EXPORT CjoseTargets DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cjose COMPONENT dev)
 
-# For use when simply using add_library from a parent project to build cjose.
-set(CJOSE_LIBRARIES cjose CACHE STRING "Cjose libraries")
+# Generate and install pkg-config .pc file
+set(prefix ${CMAKE_INSTALL_PREFIX})
+set(exec_prefix ${CMAKE_INSTALL_PREFIX})
+set(libdir ${CMAKE_INSTALL_LIBDIR})
+set(includedir ${CMAKE_INSTALL_INCLUDEDIR})
+set(VERSION ${PROJECT_VERSION})
+
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cjose.pc.in" "${CMAKE_CURRENT_BINARY_DIR}/cjose.pc" @ONLY)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/cjose.pc" DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig COMPONENT dev)
